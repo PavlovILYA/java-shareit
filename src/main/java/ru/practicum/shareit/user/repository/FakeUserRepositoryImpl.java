@@ -1,7 +1,8 @@
 package ru.practicum.shareit.user.repository;
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.user.EmailAlreadyExistsException;
+import ru.practicum.shareit.user.exception.EmailAlreadyExistsException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -22,7 +23,7 @@ public class FakeUserRepositoryImpl implements UserRepository {
 
     @Override
     public User update(User user) {
-        User storedUser = users.get(user.getId());
+        User storedUser = get(user.getId());
         if (user.getEmail() != null) {
             checkUniqueEmail(user.getEmail());
             storedUser.setEmail(user.getEmail());
@@ -40,7 +41,12 @@ public class FakeUserRepositoryImpl implements UserRepository {
 
     @Override
     public User get(Long id) {
-        return users.get(id);
+        User user = users.get(id);
+        if (user == null) {
+            throw new UserNotFoundException("User " + id + " not found");
+        } else {
+            return user;
+        }
     }
 
     @Override
