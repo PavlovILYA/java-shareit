@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
@@ -56,7 +57,7 @@ public class FakeItemRepositoryImpl implements ItemRepository {
     @Override
     public List<Item> getAllByUserId(Long userId) {
         return items.values().stream()
-                .filter(item -> item.getOwner().getId() == userId)
+                .filter(item -> Objects.equals(item.getOwner().getId(), userId))
                 .collect(Collectors.toList());
     }
 

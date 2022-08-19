@@ -3,7 +3,9 @@ package ru.practicum.shareit.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.CreateGroup;
+import ru.practicum.shareit.CreateValidationGroup;
+import ru.practicum.shareit.CustomValidationException;
+import ru.practicum.shareit.UpdateValidationGroup;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -16,13 +18,16 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto saveUser(@Validated({CreateGroup.class}) @RequestBody UserDto userDto) {
+    public UserDto saveUser(@Validated({CreateValidationGroup.class}) @RequestBody UserDto userDto) {
         return userService.saveUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable("userId") Long userId,
-                              @RequestBody UserDto userDto) {
+                              @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
+        if (userDto.getName() != null && userDto.getName().isBlank()) {
+            throw new CustomValidationException("Wrong userDto fields during updating");
+        }
         return userService.updateUser(userId, userDto);
     }
 

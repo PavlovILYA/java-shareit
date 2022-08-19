@@ -23,6 +23,13 @@ public class ErrorHandler {
         return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
     }
 
+    @ExceptionHandler(CustomValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleCustomValidationException(final CustomValidationException e) {
+        log.info("400 {}", e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleEmailExistException(final EmailAlreadyExistsException e) {

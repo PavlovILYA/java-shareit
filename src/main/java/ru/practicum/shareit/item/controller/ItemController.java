@@ -3,7 +3,9 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.CreateGroup;
+import ru.practicum.shareit.CreateValidationGroup;
+import ru.practicum.shareit.CustomValidationException;
+import ru.practicum.shareit.UpdateValidationGroup;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -18,14 +20,18 @@ public class ItemController {
 
     @PostMapping
     public ItemDto saveItem(@RequestHeader("X-Sharer-User-Id") Long userId,
-                            @Validated({CreateGroup.class}) @RequestBody ItemDto itemDto) {
+                            @Validated({CreateValidationGroup.class}) @RequestBody ItemDto itemDto) {
         return itemService.saveItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @PathVariable("itemId") Long itemId,
-                              @RequestBody ItemDto itemDto) {
+                              @Validated({UpdateValidationGroup.class}) @RequestBody ItemDto itemDto) {
+        if (itemDto.getName() != null && itemDto.getName().isBlank()
+                || itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
+            throw new CustomValidationException("Wrong itemDto fields during updating");
+        }
         return itemService.updateItem(itemDto, itemId, userId);
     }
 
