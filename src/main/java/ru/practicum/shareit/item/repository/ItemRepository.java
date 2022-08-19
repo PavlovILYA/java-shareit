@@ -12,4 +12,6 @@ public interface ItemRepository {
     Item get(Long id);
 
     List<Item> getAllByUserId(Long userId);
+
+    List<Item> getAllByTemplate(String template);
 }

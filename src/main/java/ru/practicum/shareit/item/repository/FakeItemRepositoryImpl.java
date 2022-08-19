@@ -60,6 +60,15 @@ public class FakeItemRepositoryImpl implements ItemRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Item> getAllByTemplate(String template) {
+        return items.values().stream()
+                .filter(item -> item.getAvailable() &&
+                        (item.getName().toLowerCase().contains(template) ||
+                        item.getDescription().toLowerCase().contains(template)))
+                .collect(Collectors.toList());
+    }
+
     private Long generateId() {
         return ++nextId;
     }

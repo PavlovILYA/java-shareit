@@ -7,6 +7,7 @@ import ru.practicum.shareit.CreateGroup;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -42,6 +43,9 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
                                 @RequestParam(name = "text") String text) {
-        return null;
+        if (text == null || text.isBlank()) {
+            return new ArrayList<>();
+        }
+        return itemService.getAllByTemplate(text);
     }
 }

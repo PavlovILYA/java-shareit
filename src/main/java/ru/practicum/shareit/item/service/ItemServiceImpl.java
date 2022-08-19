@@ -44,4 +44,11 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ItemDto> getAllByTemplate(String template) {
+        return itemRepository.getAllByTemplate(template.toLowerCase()).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+    }
 }

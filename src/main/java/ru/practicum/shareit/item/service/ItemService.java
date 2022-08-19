@@ -12,4 +12,6 @@ public interface ItemService {
     ItemDto getItem(Long itemId);
 
     List<ItemDto> getAllByUserId(Long userId);
+
+    List<ItemDto> getAllByTemplate(String template);
 }
