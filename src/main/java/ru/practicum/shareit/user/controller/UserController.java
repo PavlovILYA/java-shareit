@@ -29,9 +29,7 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable("userId") Long userId,
                               @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
-        if (userDto.getName() != null && userDto.getName().isBlank()) {
-            throw new CustomValidationException("Wrong userDto fields during updating");
-        }
+        validate(userDto);
         userDto.setId(userId);
         User user = UserMapper.toUser(userDto);
         return UserMapper.toUserDto(userService.updateUser(user));
@@ -52,5 +50,11 @@ public class UserController {
         return userService.getAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
+    }
+
+    private void validate(UserDto userDto) {
+        if (userDto.getName() != null && userDto.getName().isBlank()) {
+            throw new CustomValidationException("Invalid field 'name' for UserDto");
+        }
     }
 }

@@ -36,10 +36,7 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @PathVariable("itemId") Long itemId,
                               @Validated({UpdateValidationGroup.class}) @RequestBody ItemDto itemDto) {
-        if (itemDto.getName() != null && itemDto.getName().isBlank()
-                || itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
-            throw new CustomValidationException("Wrong itemDto fields during updating");
-        }
+        validate(itemDto);
         itemDto.setId(itemId);
         User owner = userService.getUser(userId);
         Item item = ItemMapper.toItem(itemDto, owner);
@@ -68,5 +65,18 @@ public class ItemController {
         return itemService.getAllByTemplate(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    private void validate(ItemDto itemDto) {
+        String errors = "";
+        if (itemDto.getName() != null && itemDto.getName().isBlank()) {
+            errors += "Invalid field 'name' for ItemDto ";
+        }
+        if (itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
+            errors += "Invalid field 'description' for ItemDto ";
+        }
+        if (!errors.isBlank()) {
+            throw new CustomValidationException(errors);
+        }
     }
 }
