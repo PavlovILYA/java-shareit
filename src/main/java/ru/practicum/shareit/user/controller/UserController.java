@@ -6,10 +6,13 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.CreateValidationGroup;
 import ru.practicum.shareit.CustomValidationException;
 import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -19,7 +22,8 @@ public class UserController {
 
     @PostMapping
     public UserDto saveUser(@Validated({CreateValidationGroup.class}) @RequestBody UserDto userDto) {
-        return userService.saveUser(userDto);
+        User user = UserMapper.toUser(userDto);
+        return UserMapper.toUserDto(userService.saveUser(user));
     }
 
     @PatchMapping("/{userId}")
@@ -28,7 +32,9 @@ public class UserController {
         if (userDto.getName() != null && userDto.getName().isBlank()) {
             throw new CustomValidationException("Wrong userDto fields during updating");
         }
-        return userService.updateUser(userId, userDto);
+        userDto.setId(userId);
+        User user = UserMapper.toUser(userDto);
+        return UserMapper.toUserDto(userService.updateUser(user));
     }
 
     @DeleteMapping("/{userId}")
@@ -38,11 +44,13 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable("userId") Long userId) {
-        return userService.getUser(userId);
+        return UserMapper.toUserDto(userService.getUser(userId));
     }
 
     @GetMapping
     public List<UserDto> getAll() {
-        return userService.getAll();
+        return userService.getAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 }

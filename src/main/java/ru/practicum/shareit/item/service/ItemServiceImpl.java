@@ -19,36 +19,27 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public ItemDto saveItem(ItemDto itemDto, Long userId) {
-        User owner = userRepository.get(userId);
-        Item item = ItemMapper.toItem(itemDto, owner);
-        return ItemMapper.toItemDto(itemRepository.save(item));
+    public Item saveItem(Item item) {
+        return itemRepository.save(item);
     }
 
     @Override
-    public ItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
-        User owner = userRepository.get(userId);
-        itemDto.setId(itemId);
-        Item item = ItemMapper.toItem(itemDto, owner);
-        return ItemMapper.toItemDto(itemRepository.update(item));
+    public Item updateItem(Item item) {
+        return itemRepository.update(item);
     }
 
     @Override
-    public ItemDto getItem(Long itemId) {
-        return ItemMapper.toItemDto(itemRepository.get(itemId));
+    public Item getItem(Long itemId) {
+        return itemRepository.get(itemId);
     }
 
     @Override
-    public List<ItemDto> getAllByUserId(Long userId) {
-        return itemRepository.getAllByUserId(userId).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<Item> getAllByUserId(Long userId) {
+        return itemRepository.getAllByUserId(userId);
     }
 
     @Override
-    public List<ItemDto> getAllByTemplate(String template) {
-        return itemRepository.getAllByTemplate(template.toLowerCase()).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<Item> getAllByTemplate(String template) {
+        return itemRepository.getAllByTemplate(template.toLowerCase());
     }
 }
