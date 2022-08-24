@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.repository;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.exception.WrongItemOwnerException;
+import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class FakeItemRepositoryImpl implements ItemRepository {
     public Item update(Item item) {
         Item storedItem = get(item.getId());
         if (!item.getOwner().equals(storedItem.getOwner())) {
-            throw new WrongItemOwnerException("Correct owner is "
+            throw new InvalidOwnerException("Correct owner is "
                     + storedItem.getOwner()
                     + " but there is "
                     + item.getOwner());

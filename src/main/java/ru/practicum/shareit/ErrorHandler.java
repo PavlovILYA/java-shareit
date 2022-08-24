@@ -7,7 +7,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.item.exception.WrongItemOwnerException;
+import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.user.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
@@ -51,9 +51,9 @@ public class ErrorHandler {
         return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
     }
 
-    @ExceptionHandler(WrongItemOwnerException.class)
+    @ExceptionHandler(InvalidOwnerException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleWrongItemOwnerException(final WrongItemOwnerException e) {
+    public ErrorResponse handleWrongItemOwnerException(final InvalidOwnerException e) {
         log.info("403 {}", e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), 403, e.getMessage());
     }
