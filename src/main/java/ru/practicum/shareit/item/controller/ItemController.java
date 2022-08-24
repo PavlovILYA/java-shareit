@@ -23,9 +23,10 @@ import java.util.stream.Collectors;
 public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
-    public ItemDto saveItem(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemDto saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
                             @Validated({CreateValidationGroup.class}) @RequestBody ItemDto itemDto) {
         User owner = userService.getUser(userId);
         Item item = ItemMapper.toItem(itemDto, owner);
@@ -33,7 +34,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemDto updateItem(@RequestHeader(USER_ID_HEADER) Long userId,
                               @PathVariable("itemId") Long itemId,
                               @Validated({UpdateValidationGroup.class}) @RequestBody ItemDto itemDto) {
         validate(itemDto);
@@ -44,20 +45,20 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                            @PathVariable("itemId") Long itemId) {
         return ItemMapper.toItemDto(itemService.getItem(itemId));
     }
 
     @GetMapping
-    public List<ItemDto> getMyItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
         return itemService.getAllByUserId(userId).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public List<ItemDto> search(@RequestHeader(USER_ID_HEADER) Long userId,
                                 @RequestParam(name = "text") String text) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
