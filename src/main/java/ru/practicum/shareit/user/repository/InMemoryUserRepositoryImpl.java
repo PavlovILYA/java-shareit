@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
-public class FakeUserRepositoryImpl implements UserRepository {
+public class InMemoryUserRepositoryImpl implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
     private long nextId;
 
