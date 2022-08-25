@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
-public class FakeItemRepositoryImpl implements ItemRepository {
+public class InMemoryItemRepositoryImpl implements ItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
     private long nextId;
 

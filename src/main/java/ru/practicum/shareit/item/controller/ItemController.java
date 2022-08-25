@@ -69,15 +69,11 @@ public class ItemController {
     }
 
     private void validate(ItemDto itemDto) {
-        String errors = "";
         if (itemDto.getName() != null && itemDto.getName().isBlank()) {
-            errors += "Invalid field 'name' for ItemDto ";
+            throw new CustomValidationException("Invalid field 'name' for ItemDto");
         }
         if (itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
-            errors += "Invalid field 'description' for ItemDto ";
-        }
-        if (!errors.isBlank()) {
-            throw new CustomValidationException(errors);
+            throw new CustomValidationException("Invalid field 'description' for ItemDto");
         }
     }
 }
