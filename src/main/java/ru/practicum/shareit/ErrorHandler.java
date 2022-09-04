@@ -7,6 +7,8 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.booking.exception.BookingDurationException;
+import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.user.exception.EmailAlreadyExistsException;
@@ -64,5 +66,19 @@ public class ErrorHandler {
     public ErrorResponse handleWrongItemOwnerException(final InvalidOwnerException e) {
         log.info("403 {}", e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), 403, e.getMessage());
+    }
+
+    @ExceptionHandler(UnavailableItemException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnavailableItemException(final UnavailableItemException e) {
+        log.info("400 {}", e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
+    }
+
+    @ExceptionHandler(BookingDurationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBookingDurationException(final BookingDurationException e) {
+        log.info("400 {}", e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
     }
 }
