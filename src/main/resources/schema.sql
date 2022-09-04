@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS users (
      id BIGINT GENERATED ALWAYS AS IDENTITY NOT NULL,
      name VARCHAR(255) NOT NULL,
-     email VARCHAR(255) NOT NULL UNIQUE,
-     PRIMARY KEY (id)
+     email VARCHAR(255) NOT NULL,
+     PRIMARY KEY (id),
+     CONSTRAINT unique_email UNIQUE (email)
 );
 
 CREATE TABLE IF NOT EXISTS items (
@@ -45,9 +46,22 @@ CREATE TABLE IF NOT EXISTS comments (
     FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
+DELETE FROM bookings;
+DELETE FROM requests;
+DELETE FROM comments;
+DELETE FROM items;
+DELETE FROM users;
+
+ALTER TABLE bookings ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE requests ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE comments ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE items    ALTER COLUMN id RESTART WITH 1;
+ALTER TABLE users    ALTER COLUMN id RESTART WITH 1;
+
 -- DROP TABLE bookings;
 -- DROP TABLE requests;
 -- DROP TABLE comments;
 -- DROP TABLE items;
 -- DROP TABLE users;
 
+select lower('ПоптаРРАОаОЫФДЛА DSGNkjsgkjsGJ')

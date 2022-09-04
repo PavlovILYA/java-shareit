@@ -17,7 +17,6 @@ public class ItemMapper {
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                owner,
-                null); // temporary
+                owner);
     }
 }
