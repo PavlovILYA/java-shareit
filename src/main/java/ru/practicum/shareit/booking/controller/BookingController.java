@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingReturnDto;
 import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -34,30 +35,34 @@ public class BookingController {
         Item item = itemService.getItem(bookingCreateDto.getItemId());
         User booker = userService.getUser(userId);
         Booking booking = BookingMapper.fromBookingCreateDto(bookingCreateDto, item, booker);
-        return BookingMapper.toBookingCreateDto(bookingService.saveBooking(booking));
+        return BookingMapper.toBookingCreateDto(
+                bookingService.saveBooking(booking));
     }
 
     @PatchMapping("/{bookingId}")
-    public Booking approveBooking(@PathVariable("bookingId") Long bookingId,
+    public BookingReturnDto approveBooking(@PathVariable("bookingId") Long bookingId,
                                            @RequestParam("approved") Boolean approved,
                                            @RequestHeader(USER_ID_HEADER) Long userId) {
-        return bookingService.approveBooking(bookingId, approved, userId);
+        return BookingMapper.toBookingReturnDto(
+                bookingService.approveBooking(bookingId, approved, userId));
     }
 
     @GetMapping("/{bookingId}")
-    public BookingCreateDto getBooking(@PathVariable("bookingId") Long bookingId,
+    public BookingReturnDto getBooking(@PathVariable("bookingId") Long bookingId,
                                        @RequestHeader(USER_ID_HEADER) Long userId) {
-        return null;
+
+        return BookingMapper.toBookingReturnDto(
+                bookingService.getBookingById(bookingId, userId));
     }
 
     @GetMapping
-    public List<BookingCreateDto> getMyBookingRequests(@RequestParam("state") String state,
+    public List<BookingReturnDto> getMyBookingRequests(@RequestParam("state") String state,
                                                        @RequestHeader(USER_ID_HEADER) Long userId) {
         return null;
     }
 
     @GetMapping("/owner")
-    public List<BookingCreateDto> getMyBooking(@RequestParam("state") String state,
+    public List<BookingReturnDto> getMyBooking(@RequestParam("state") String state,
                                                @RequestHeader(USER_ID_HEADER) Long userId) {
         return null;
     }

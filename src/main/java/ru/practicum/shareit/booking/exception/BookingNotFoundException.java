@@ -5,6 +5,10 @@ public class BookingNotFoundException extends RuntimeException {
         super();
     }
 
+    public BookingNotFoundException(String message) {
+        super(message);
+    }
+
     public BookingNotFoundException(Long id) {
         super("Booking " + id + " not found");
     }

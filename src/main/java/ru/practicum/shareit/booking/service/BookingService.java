@@ -9,7 +9,7 @@ public interface BookingService {
 
     Booking approveBooking(Long bookingId, Boolean isApproved, Long ownerId);
 
-    Booking getBookingById(Long bookingId);
+    Booking getBookingById(Long bookingId, Long userId);
 
     List<Booking> getBookingRequestsByUserId(Long userId);
 

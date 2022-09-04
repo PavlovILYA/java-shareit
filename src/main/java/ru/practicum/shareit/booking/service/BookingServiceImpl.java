@@ -38,8 +38,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getBookingById(Long bookingId) {
-        return null;
+    public Booking getBookingById(Long bookingId, Long userId) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
+            throw new BookingNotFoundException(bookingId);
+        });
+        checkAccess(booking, userId);
+        return booking;
     }
 
     @Override
@@ -60,6 +64,13 @@ public class BookingServiceImpl implements BookingService {
         if (newStatus.equals(booking.getStatus())) {
             throw new BookingValidationException("Booking " + booking.getId() +
                     " is already " + newStatus);
+        }
+    }
+
+    private void checkAccess(Booking booking, Long userId) {
+        if (!booking.getBooker().getId().equals(userId) &&
+                !booking.getItem().getOwner().getId().equals(userId)) {
+            throw new BookingNotFoundException("No access to booking " + booking.getId());
         }
     }
 }
