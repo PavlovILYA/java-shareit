@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
-import ru.practicum.shareit.booking.exception.BookingDurationException;
+import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.model.Item;
@@ -38,10 +38,10 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingCreateDto approveBooking(@PathVariable("bookingId") Long bookingId,
+    public Booking approveBooking(@PathVariable("bookingId") Long bookingId,
                                            @RequestParam("approved") Boolean approved,
                                            @RequestHeader(USER_ID_HEADER) Long userId) {
-        return null;
+        return bookingService.approveBooking(bookingId, approved, userId);
     }
 
     @GetMapping("/{bookingId}")
@@ -64,7 +64,7 @@ public class BookingController {
 
     private void validateBookingDuration(LocalDateTime start, LocalDateTime end) {
         if (start.isAfter(end)) {
-            throw new BookingDurationException("start time (" + start +
+            throw new BookingValidationException("start time (" + start +
                     ") is after then end time (" + end + ")");
         }
     }

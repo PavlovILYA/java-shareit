@@ -7,7 +7,8 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.exception.BookingDurationException;
+import ru.practicum.shareit.booking.exception.BookingValidationException;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
@@ -75,10 +76,17 @@ public class ErrorHandler {
         return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
     }
 
-    @ExceptionHandler(BookingDurationException.class)
+    @ExceptionHandler(BookingValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBookingDurationException(final BookingDurationException e) {
+    public ErrorResponse handleBookingValidationException(final BookingValidationException e) {
         log.info("400 {}", e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
+    }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleBookingNotFoundException(final BookingNotFoundException e) {
+        log.info("404 {}", e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), 404, e.getMessage());
     }
 }

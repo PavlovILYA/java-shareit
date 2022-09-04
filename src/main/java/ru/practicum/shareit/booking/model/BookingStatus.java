@@ -8,7 +8,7 @@ public enum BookingStatus {
     REJECTED,
     CANCELED;
 
-    static BookingStatus fromString(String stringStatus) {
+    public static BookingStatus fromString(String stringStatus) {
         switch (stringStatus) {
             case "WAITING":
                 return WAITING;
@@ -20,6 +20,14 @@ public enum BookingStatus {
                 return CANCELED;
             default:
                 throw new InvalidBookingStatus("BookingStatus " + stringStatus + " doesn't exist");
+        }
+    }
+
+    public static BookingStatus approve(Boolean isApproved) {
+        if (isApproved) {
+            return APPROVED;
+        } else {
+            return REJECTED;
         }
     }
 }
