@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingReturnDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -36,6 +37,7 @@ public class BookingController {
         validateBookingDuration(bookingCreateDto.getStart(), bookingCreateDto.getEnd());
         Item item = itemService.getItem(bookingCreateDto.getItemId());
         User booker = userService.getUser(userId);
+        compareBookerAndItemOwner(booker, item);
         Booking booking = BookingMapper.fromBookingCreateDto(bookingCreateDto, item, booker);
         return BookingMapper.toBookingCreateDto(
                 bookingService.saveBooking(booking));
@@ -78,6 +80,12 @@ public class BookingController {
         if (start.isAfter(end)) {
             throw new BookingValidationException("Start time (" + start +
                     ") is after then end time (" + end + ")");
+        }
+    }
+
+    private void compareBookerAndItemOwner(User booker, Item item) {
+        if (booker.getId().equals(item.getOwner().getId())) {
+            throw new BookingNotFoundException("Item " + item.getId() + " is your");
         }
     }
 }
