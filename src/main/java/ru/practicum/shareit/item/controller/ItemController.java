@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.CreateValidationGroup;
 import ru.practicum.shareit.CustomValidationException;
 import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -15,6 +17,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
+    private final BookingService bookingService;
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
@@ -45,15 +49,26 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ItemWithBookingsDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                            @PathVariable("itemId") Long itemId) {
-        return ItemMapper.toItemDto(itemService.getItem(itemId));
+        Item item = itemService.getItem(itemId);
+        if (item.getOwner().getId().equals(userId)) {
+            return ItemMapper.toItemWithBookingsDto(item,
+                    bookingService.getLastBookingByItem(item),
+                    bookingService.getNextBookingByItem(item));
+        } else {
+            return ItemMapper.toItemWithBookingsDto(item,
+                    Optional.empty(),
+                    Optional.empty());
+        }
     }
 
     @GetMapping
-    public List<ItemDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemWithBookingsDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
         return itemService.getAllByUserId(userId).stream()
-                .map(ItemMapper::toItemDto)
+                .map(item -> ItemMapper.toItemWithBookingsDto(item,
+                        bookingService.getLastBookingByItem(item),
+                        bookingService.getNextBookingByItem(item)))
                 .collect(Collectors.toList());
     }
 

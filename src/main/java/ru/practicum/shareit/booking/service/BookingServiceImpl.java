@@ -11,11 +11,13 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -96,6 +98,18 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new InvalidBookingStatusException();
         }
+    }
+
+    @Override
+    public Optional<Booking> getLastBookingByItem(Item item) {
+        return bookingRepository.findAllPastOrCurrentByItemDesc(item).stream()
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Booking> getNextBookingByItem(Item item) {
+        return bookingRepository.findAllFutureByItemAsc(item).stream()
+                .findFirst();
     }
 
     private void checkBookingBeforeApprove(Booking booking, BookingStatus newStatus, Long ownerId) {

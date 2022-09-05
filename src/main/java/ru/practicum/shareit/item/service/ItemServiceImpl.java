@@ -6,8 +6,6 @@ import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -15,7 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
 
     @Override
     public Item saveItem(Item item) {
@@ -48,11 +45,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> getAllByUserId(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    throw new UserNotFoundException(userId);
-                })
-                .getItems();
+        return itemRepository.getAllByOwnerIdOrderById(userId);
     }
 
     @Override
