@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "items")
@@ -24,5 +26,7 @@ public class Item {
     @JoinColumn(table = "items", name = "owner_id")
     @JsonIgnore
     private User owner;
+    @OneToMany(mappedBy = "item")
+    private List<Comment> comments = new ArrayList<>();
 //    private ItemRequest request;
 }

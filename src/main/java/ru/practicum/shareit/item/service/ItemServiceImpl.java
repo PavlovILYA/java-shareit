@@ -2,9 +2,14 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.exception.UnavailableItemException;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 
 import java.util.List;
@@ -13,6 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     public Item saveItem(Item item) {
@@ -51,6 +58,17 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<Item> getAllByTemplate(String template) {
         return itemRepository.getAllByTemplate(template);
+    }
+
+    @Override
+    public Comment saveComment(Comment comment) {
+        List<Booking> userBookings = bookingRepository.findAllPastByBooker(comment.getAuthor());
+        boolean doesAuthorRentThisItem = userBookings.stream().anyMatch(booking ->
+                booking.getItem().getId().equals(comment.getItem().getId()));
+        if (!doesAuthorRentThisItem) {
+            throw new UnavailableItemException(comment.getItem().getId());
+        }
+        return commentRepository.save(comment);
     }
 
     private void updateFields(Item item, Item storedItem) {

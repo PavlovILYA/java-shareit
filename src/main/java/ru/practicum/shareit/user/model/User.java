@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.persistence.*;
@@ -25,6 +26,9 @@ public class User {
     @OneToMany(mappedBy = "owner")
     @JsonIgnore
     private List<Item> items = new ArrayList<>();
+    @OneToMany(mappedBy = "author")
+    @JsonIgnore
+    private List<Comment> comments = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

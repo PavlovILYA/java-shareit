@@ -38,30 +38,31 @@ CREATE TABLE IF NOT EXISTS requests (
 
 CREATE TABLE IF NOT EXISTS comments (
     id BIGINT GENERATED ALWAYS AS IDENTITY NOT NULL,
-    test TEXT NOT NULL,
+    text TEXT NOT NULL,
     item_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
+    created DATE NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (item_id) REFERENCES  items(id),
     FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
-DELETE FROM bookings;
-DELETE FROM requests;
-DELETE FROM comments;
-DELETE FROM items;
-DELETE FROM users;
 
-ALTER TABLE bookings ALTER COLUMN id RESTART WITH 1;
-ALTER TABLE requests ALTER COLUMN id RESTART WITH 1;
-ALTER TABLE comments ALTER COLUMN id RESTART WITH 1;
-ALTER TABLE items    ALTER COLUMN id RESTART WITH 1;
-ALTER TABLE users    ALTER COLUMN id RESTART WITH 1;
+-- DELETE FROM bookings;
+-- DELETE FROM requests;
+-- DELETE FROM comments;
+-- DELETE FROM items;
+-- DELETE FROM users;
+--
+-- ALTER TABLE bookings ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE requests ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE comments ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE items    ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE users    ALTER COLUMN id RESTART WITH 1;
+
 
 -- DROP TABLE bookings;
 -- DROP TABLE requests;
 -- DROP TABLE comments;
 -- DROP TABLE items;
 -- DROP TABLE users;
-
-select lower('ПоптаРРАОаОЫФДЛА DSGNkjsgkjsGJ')

@@ -8,13 +8,17 @@ import ru.practicum.shareit.CustomValidationException;
 import ru.practicum.shareit.UpdateValidationGroup;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentReturnDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
+import ru.practicum.shareit.item.dto.ItemReturnDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,24 +53,24 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemWithBookingsDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
-                           @PathVariable("itemId") Long itemId) {
+    public ItemReturnDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
+                                 @PathVariable("itemId") Long itemId) {
         Item item = itemService.getItem(itemId);
         if (item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemWithBookingsDto(item,
+            return ItemMapper.toItemReturnDto(item,
                     bookingService.getLastBookingByItem(item),
                     bookingService.getNextBookingByItem(item));
         } else {
-            return ItemMapper.toItemWithBookingsDto(item,
+            return ItemMapper.toItemReturnDto(item,
                     Optional.empty(),
                     Optional.empty());
         }
     }
 
     @GetMapping
-    public List<ItemWithBookingsDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemReturnDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
         return itemService.getAllByUserId(userId).stream()
-                .map(item -> ItemMapper.toItemWithBookingsDto(item,
+                .map(item -> ItemMapper.toItemReturnDto(item,
                         bookingService.getLastBookingByItem(item),
                         bookingService.getNextBookingByItem(item)))
                 .collect(Collectors.toList());
@@ -81,6 +85,16 @@ public class ItemController {
         return itemService.getAllByTemplate(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentReturnDto saveComment(@PathVariable("itemId") Long itemId,
+                                        @Valid @RequestBody CommentCreateDto commentCreateDto,
+                                        @RequestHeader(USER_ID_HEADER) Long userId) {
+        User author = userService.getUser(userId);
+        Item item = itemService.getItem(itemId);
+        Comment comment = ItemMapper.toComment(commentCreateDto, author, item);
+        return ItemMapper.toCommentReturnDto(itemService.saveComment(comment));
     }
 
     private void validate(ItemDto itemDto) {
