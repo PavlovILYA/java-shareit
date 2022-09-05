@@ -11,20 +11,39 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBookerOrderByStartDesc(User booker);
 
-    @Query(value = "SELECT b FROM Booking AS b WHERE b.booker.id = :bookerId AND" +
+    @Query(value = "SELECT b FROM Booking AS b WHERE b.booker = :booker AND" +
             " b.start > current_timestamp()" +
             " ORDER BY b.start DESC")
-    List<Booking> findAllFutureByBookerId(Long bookerId);
+    List<Booking> findAllFutureByBooker(User booker);
 
-    @Query(value = "SELECT b FROM Booking AS b WHERE b.booker.id = :bookerId AND" +
+    @Query(value = "SELECT b FROM Booking AS b WHERE b.booker = :booker AND" +
             " b.end < current_timestamp()" +
             " ORDER BY b.start DESC")
-    List<Booking> findAllPastByBookerId(Long bookerId);
+    List<Booking> findAllPastByBooker(User booker);
 
-    @Query(value = "SELECT b FROM Booking AS b WHERE b.booker.id = :bookerId AND" +
+    @Query(value = "SELECT b FROM Booking AS b WHERE b.booker = :booker AND" +
             " b.start < current_timestamp() AND b.end > current_timestamp()" +
             " ORDER BY b.start DESC")
-    List<Booking> findAllCurrentByBookerId(Long bookerId);
+    List<Booking> findAllCurrentByBooker(User booker);
 
     List<Booking> findAllByBookerAndStatusOrderByStartDesc(User booker, BookingStatus status);
+
+    List<Booking> findAllByItemOwnerOrderByStartDesc(User owner);
+
+    @Query("SELECT b FROM Booking AS b WHERE b.item.owner = :owner AND" +
+            " b.start > current_timestamp()" +
+            " ORDER BY b.start DESC")
+    List<Booking> findAllFutureByOwner(User owner);
+
+    @Query("SELECT b FROM Booking AS b WHERE b.item.owner = :owner AND" +
+            " b.end < current_timestamp()" +
+            " ORDER BY b.start DESC")
+    List<Booking> findAllPastByOwner(User owner);
+
+    @Query("SELECT b FROM Booking AS b WHERE b.item.owner = :owner AND" +
+            " b.start < current_timestamp() AND b.end > current_timestamp()" +
+            " ORDER BY b.start DESC")
+    List<Booking> findAllCurrentByOwner(User owner);
+
+    List<Booking> findAllByItemOwnerAndStatusOrderByStartDesc(User owner, BookingStatus status);
 }

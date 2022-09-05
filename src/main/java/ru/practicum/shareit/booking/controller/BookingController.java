@@ -61,18 +61,22 @@ public class BookingController {
                                                        @RequestHeader(USER_ID_HEADER) Long userId) {
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingRequestsByUserId(userId, bookingState).stream()
-                .map(BookingMapper::toBookingReturnDto).collect(Collectors.toList());
+                .map(BookingMapper::toBookingReturnDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/owner")
-    public List<BookingReturnDto> getMyBooking(@RequestParam("state") String state,
+    public List<BookingReturnDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
                                                @RequestHeader(USER_ID_HEADER) Long userId) {
-        return null;
+        BookingState bookingState = BookingState.fromString(state);
+        return bookingService.getBookingsByOwnerId(userId, bookingState).stream()
+                .map(BookingMapper::toBookingReturnDto)
+                .collect(Collectors.toList());
     }
 
     private void validateBookingDuration(LocalDateTime start, LocalDateTime end) {
         if (start.isAfter(end)) {
-            throw new BookingValidationException("start time (" + start +
+            throw new BookingValidationException("Start time (" + start +
                     ") is after then end time (" + end + ")");
         }
     }

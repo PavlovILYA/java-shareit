@@ -61,11 +61,11 @@ public class BookingServiceImpl implements BookingService {
             case ALL:
                 return bookingRepository.findAllByBookerOrderByStartDesc(booker);
             case CURRENT:
-                return bookingRepository.findAllCurrentByBookerId(userId);
+                return bookingRepository.findAllCurrentByBooker(booker);
             case PAST:
-                return bookingRepository.findAllPastByBookerId(userId);
+                return bookingRepository.findAllPastByBooker(booker);
             case FUTURE:
-                return bookingRepository.findAllFutureByBookerId(userId);
+                return bookingRepository.findAllFutureByBooker(booker);
             case WAITING:
                 return bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.WAITING);
             case REJECTED:
@@ -76,8 +76,26 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsByUserId(Long userId) {
-        return null;
+    public List<Booking> getBookingsByOwnerId(Long ownerId, BookingState state) {
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> {
+            throw new UserNotFoundException(ownerId);
+        });
+        switch (state) {
+            case ALL:
+                return bookingRepository.findAllByItemOwnerOrderByStartDesc(owner);
+            case CURRENT:
+                return bookingRepository.findAllCurrentByOwner(owner);
+            case PAST:
+                return bookingRepository.findAllPastByOwner(owner);
+            case FUTURE:
+                return bookingRepository.findAllFutureByOwner(owner);
+            case WAITING:
+                return bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner, BookingStatus.WAITING);
+            case REJECTED:
+                return bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner, BookingStatus.REJECTED);
+            default:
+                throw new InvalidBookingStatusException();
+        }
     }
 
     private void checkBookingBeforeApprove(Booking booking, BookingStatus newStatus, Long ownerId) {
