@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingReturnDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -17,6 +18,7 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -50,15 +52,16 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingReturnDto getBooking(@PathVariable("bookingId") Long bookingId,
                                        @RequestHeader(USER_ID_HEADER) Long userId) {
-
         return BookingMapper.toBookingReturnDto(
                 bookingService.getBookingById(bookingId, userId));
     }
 
     @GetMapping
-    public List<BookingReturnDto> getMyBookingRequests(@RequestParam("state") String state,
+    public List<BookingReturnDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
                                                        @RequestHeader(USER_ID_HEADER) Long userId) {
-        return null;
+        BookingState bookingState = BookingState.fromString(state);
+        return bookingService.getBookingRequestsByUserId(userId, bookingState).stream()
+                .map(BookingMapper::toBookingReturnDto).collect(Collectors.toList());
     }
 
     @GetMapping("/owner")

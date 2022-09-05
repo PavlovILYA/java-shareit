@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.booking.exception.InvalidBookingStatusException;
 import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
@@ -88,5 +89,12 @@ public class ErrorHandler {
     public ErrorResponse handleBookingNotFoundException(final BookingNotFoundException e) {
         log.info("404 {}", e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), 404, e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidBookingStatusException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidBookingStatusException(final InvalidBookingStatusException e) {
+        log.info("400 {}", e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), 400, e.getMessage());
     }
 }

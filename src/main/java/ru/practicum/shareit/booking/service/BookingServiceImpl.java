@@ -2,13 +2,18 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.exception.BookingValidationException;
+import ru.practicum.shareit.booking.exception.InvalidBookingStatusException;
 import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -16,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Booking saveBooking(Booking booking) {
@@ -47,8 +53,26 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingRequestsByUserId(Long userId) {
-        return null;
+    public List<Booking> getBookingRequestsByUserId(Long userId, BookingState state) {
+        User booker = userRepository.findById(userId).orElseThrow(() -> {
+            throw new UserNotFoundException(userId);
+        });
+        switch (state) {
+            case ALL:
+                return bookingRepository.findAllByBookerOrderByStartDesc(booker);
+            case CURRENT:
+                return bookingRepository.findAllCurrentByBookerId(userId);
+            case PAST:
+                return bookingRepository.findAllPastByBookerId(userId);
+            case FUTURE:
+                return bookingRepository.findAllFutureByBookerId(userId);
+            case WAITING:
+                return bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.WAITING);
+            case REJECTED:
+                return bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.REJECTED);
+            default:
+                throw new InvalidBookingStatusException();
+        }
     }
 
     @Override

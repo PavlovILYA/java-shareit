@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-import ru.practicum.shareit.booking.exception.InvalidBookingStatus;
+import ru.practicum.shareit.booking.exception.InvalidBookingStatusException;
 
 public enum BookingStatus {
     WAITING,
@@ -19,7 +19,7 @@ public enum BookingStatus {
             case "CANCELED":
                 return CANCELED;
             default:
-                throw new InvalidBookingStatus("BookingStatus " + stringStatus + " doesn't exist");
+                throw new InvalidBookingStatusException("Unknown status:  " + stringStatus);
         }
     }
 
