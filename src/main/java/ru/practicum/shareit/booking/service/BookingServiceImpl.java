@@ -27,11 +27,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking saveBooking(Booking booking) {
-        if (booking.getItem().getAvailable().equals(Boolean.TRUE)) {
-            return bookingRepository.save(booking);
-        } else {
+        if (!booking.getItem().getAvailable().equals(Boolean.TRUE)) {
             throw new UnavailableItemException(booking.getItem().getId());
         }
+        return bookingRepository.save(booking);
     }
 
     @Override

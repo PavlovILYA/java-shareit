@@ -28,5 +28,4 @@ public class Item {
     private User owner;
     @OneToMany(mappedBy = "item")
     private List<Comment> comments = new ArrayList<>();
-//    private ItemRequest request;
 }
