@@ -9,25 +9,14 @@ public enum BookingStatus {
     CANCELED;
 
     public static BookingStatus fromString(String stringStatus) {
-        switch (stringStatus) {
-            case "WAITING":
-                return WAITING;
-            case "APPROVED":
-                return APPROVED;
-            case "REJECTED":
-                return REJECTED;
-            case "CANCELED":
-                return CANCELED;
-            default:
-                throw new InvalidBookingStatusException("Unknown status:  " + stringStatus);
+        try {
+            return BookingStatus.valueOf(stringStatus);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidBookingStatusException("Unknown status:  " + stringStatus);
         }
     }
 
-    public static BookingStatus approve(Boolean isApproved) {
-        if (isApproved) {
-            return APPROVED;
-        } else {
-            return REJECTED;
-        }
+    public static BookingStatus approve(boolean isApproved) {
+        return isApproved ? APPROVED : REJECTED;
     }
 }
