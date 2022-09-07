@@ -2,9 +2,9 @@ package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
-import ru.practicum.shareit.item.dto.CommentReturnDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemReturnDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -30,10 +30,10 @@ public class ItemMapper {
                 null); // comments
     }
 
-    public static ItemReturnDto toItemReturnDto(Item item,
-                                                Optional<Booking> lastBooking,
-                                                Optional<Booking> nextBooking) {
-        return new ItemReturnDto(item.getId(),
+    public static ItemResponseDto toItemReturnDto(Item item,
+                                                  Optional<Booking> lastBooking,
+                                                  Optional<Booking> nextBooking) {
+        return new ItemResponseDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
@@ -52,19 +52,19 @@ public class ItemMapper {
                 LocalDate.now());
     }
 
-    public static CommentReturnDto toCommentReturnDto(Comment comment) {
-        return new CommentReturnDto(comment.getId(),
+    public static CommentResponseDto toCommentReturnDto(Comment comment) {
+        return new CommentResponseDto(comment.getId(),
                 comment.getText(),
                 comment.getItem().getName(),
                 comment.getAuthor().getName(),
                 comment.getCreated());
     }
 
-    private static ItemReturnDto.BookingDto getBookingDtoIfExist(Optional<Booking> booking) {
+    private static ItemResponseDto.BookingDto getBookingDtoIfExist(Optional<Booking> booking) {
         if (booking.isEmpty()) {
             return null;
         } else {
-            return new ItemReturnDto.BookingDto(booking.get().getId(),
+            return new ItemResponseDto.BookingDto(booking.get().getId(),
                     booking.get().getStart(),
                     booking.get().getEnd(),
                     booking.get().getBooker().getId());

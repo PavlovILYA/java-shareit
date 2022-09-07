@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
-import ru.practicum.shareit.booking.dto.BookingReturnDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
 import ru.practicum.shareit.booking.exception.BookingValidationException;
@@ -26,10 +26,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
 public class BookingController {
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public BookingCreateDto saveBooking(@Valid @RequestBody BookingCreateDto bookingCreateDto,
@@ -44,23 +45,23 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingReturnDto approveBooking(@PathVariable("bookingId") Long bookingId,
-                                           @RequestParam("approved") Boolean approved,
-                                           @RequestHeader(USER_ID_HEADER) Long userId) {
+    public BookingResponseDto approveBooking(@PathVariable("bookingId") Long bookingId,
+                                             @RequestParam("approved") Boolean approved,
+                                             @RequestHeader(USER_ID_HEADER) Long userId) {
         return BookingMapper.toBookingReturnDto(
                 bookingService.approveBooking(bookingId, approved, userId));
     }
 
     @GetMapping("/{bookingId}")
-    public BookingReturnDto getBooking(@PathVariable("bookingId") Long bookingId,
-                                       @RequestHeader(USER_ID_HEADER) Long userId) {
+    public BookingResponseDto getBooking(@PathVariable("bookingId") Long bookingId,
+                                         @RequestHeader(USER_ID_HEADER) Long userId) {
         return BookingMapper.toBookingReturnDto(
                 bookingService.getBookingById(bookingId, userId));
     }
 
     @GetMapping
-    public List<BookingReturnDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                       @RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<BookingResponseDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
+                                                         @RequestHeader(USER_ID_HEADER) Long userId) {
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingRequestsByUserId(userId, bookingState).stream()
                 .map(BookingMapper::toBookingReturnDto)
@@ -68,8 +69,8 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingReturnDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                               @RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<BookingResponseDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
+                                                  @RequestHeader(USER_ID_HEADER) Long userId) {
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingsByOwnerId(userId, bookingState).stream()
                 .map(BookingMapper::toBookingReturnDto)

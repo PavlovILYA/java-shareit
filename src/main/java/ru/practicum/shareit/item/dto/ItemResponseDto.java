@@ -8,14 +8,14 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class ItemReturnDto {
+public class ItemResponseDto {
     private Long id;
     private String name;
     private String description;
     private Boolean available;
     private BookingDto lastBooking;
     private BookingDto nextBooking;
-    private List<CommentReturnDto> comments;
+    private List<CommentResponseDto> comments;
 
     @Data
     @AllArgsConstructor
