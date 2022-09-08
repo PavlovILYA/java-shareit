@@ -6,24 +6,33 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.CreateValidationGroup;
 import ru.practicum.shareit.CustomValidationException;
 import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
     private final ItemService itemService;
     private final UserService userService;
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    private final BookingService bookingService;
 
     @PostMapping
     public ItemDto saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
@@ -45,15 +54,26 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
-                           @PathVariable("itemId") Long itemId) {
-        return ItemMapper.toItemDto(itemService.getItem(itemId));
+    public ItemResponseDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
+                                   @PathVariable("itemId") Long itemId) {
+        Item item = itemService.getItem(itemId);
+        if (item.getOwner().getId().equals(userId)) {
+            return ItemMapper.toItemReturnDto(item,
+                    bookingService.getLastBookingByItem(item),
+                    bookingService.getNextBookingByItem(item));
+        } else {
+            return ItemMapper.toItemReturnDto(item,
+                    Optional.empty(),
+                    Optional.empty());
+        }
     }
 
     @GetMapping
-    public List<ItemDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemResponseDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
         return itemService.getAllByUserId(userId).stream()
-                .map(ItemMapper::toItemDto)
+                .map(item -> ItemMapper.toItemReturnDto(item,
+                        bookingService.getLastBookingByItem(item),
+                        bookingService.getNextBookingByItem(item)))
                 .collect(Collectors.toList());
     }
 
@@ -66,6 +86,16 @@ public class ItemController {
         return itemService.getAllByTemplate(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentResponseDto saveComment(@PathVariable("itemId") Long itemId,
+                                          @Valid @RequestBody CommentCreateDto commentCreateDto,
+                                          @RequestHeader(USER_ID_HEADER) Long userId) {
+        User author = userService.getUser(userId);
+        Item item = itemService.getItem(itemId);
+        Comment comment = ItemMapper.toComment(commentCreateDto, author, item);
+        return ItemMapper.toCommentReturnDto(itemService.saveComment(comment));
     }
 
     private void validate(ItemDto itemDto) {
