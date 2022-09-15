@@ -12,9 +12,9 @@ public interface ItemService {
 
     Item getItem(Long itemId);
 
-    List<Item> getAllByUserId(Long userId);
+    List<Item> getAllByUserId(Long userId, int from, int size);
 
-    List<Item> getAllByTemplate(String template);
+    List<Item> getAllByTemplate(String template, int from, int size);
 
     Comment saveComment(Comment comment);
 }

@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.booking.model.Booking;
@@ -51,13 +53,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> getAllByUserId(Long userId) {
-        return itemRepository.getAllByOwnerIdOrderById(userId);
+    public List<Item> getAllByUserId(Long userId, int from, int size) {
+        Pageable pageRequest = PageRequest.of(from / size, size);
+        return itemRepository.getAllByOwnerIdOrderById(userId, pageRequest).getContent();
     }
 
     @Override
-    public List<Item> getAllByTemplate(String template) {
-        return itemRepository.getAllByTemplate(template);
+    public List<Item> getAllByTemplate(String template, int from, int size) {
+        Pageable pageRequest = PageRequest.of(from / size, size);
+        return itemRepository.getAllByTemplate(template, pageRequest).getContent();
     }
 
     @Override

@@ -46,9 +46,9 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestResponseDto> getAlienRequests(@RequestHeader(USER_ID_HEADER) Long userId,
                                                          @PositiveOrZero
-                                                         @RequestParam(value = "from", defaultValue = "0") int from,
+                                                         @RequestParam(name = "from", defaultValue = "0") int from,
                                                          @Positive
-                                                         @RequestParam(value = "size", defaultValue = "5") int size) {
+                                                         @RequestParam(name = "size", defaultValue = "5") int size) {
         User requester = userService.getUser(userId);
         return requestService.getAllAlien(requester, from, size).stream()
                 .map(RequestMapper::toRequestDto)

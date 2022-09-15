@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
@@ -17,11 +18,14 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/bookings")
@@ -60,19 +64,27 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingResponseDto> getMyBookingRequests(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                         @RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<BookingResponseDto> getMyBookingRequests(@RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                         @RequestHeader(USER_ID_HEADER) Long userId,
+                                                         @PositiveOrZero
+                                                         @RequestParam(name = "from", defaultValue = "0") int from,
+                                                         @Positive
+                                                         @RequestParam(name = "size", defaultValue = "5") int size) {
         BookingState bookingState = BookingState.fromString(state);
-        return bookingService.getBookingRequestsByUserId(userId, bookingState).stream()
+        return bookingService.getBookingRequestsByUserId(userId, bookingState, from, size).stream()
                 .map(BookingMapper::toBookingReturnDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/owner")
-    public List<BookingResponseDto> getMyBookings(@RequestParam(value = "state", defaultValue = "ALL") String state,
-                                                  @RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<BookingResponseDto> getMyBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                  @RequestHeader(USER_ID_HEADER) Long userId,
+                                                  @PositiveOrZero
+                                                  @RequestParam(name = "from", defaultValue = "0") int from,
+                                                  @Positive
+                                                  @RequestParam(name = "size", defaultValue = "5") int size) {
         BookingState bookingState = BookingState.fromString(state);
-        return bookingService.getBookingsByOwnerId(userId, bookingState).stream()
+        return bookingService.getBookingsByOwnerId(userId, bookingState, from, size).stream()
                 .map(BookingMapper::toBookingReturnDto)
                 .collect(Collectors.toList());
     }

@@ -21,11 +21,14 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -75,8 +78,12 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemResponseDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId) {
-        return itemService.getAllByUserId(userId).stream()
+    public List<ItemResponseDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId,
+                                            @PositiveOrZero
+                                            @RequestParam(name = "from", defaultValue = "0") int from,
+                                            @Positive
+                                            @RequestParam(name = "size", defaultValue = "5") int size) {
+        return itemService.getAllByUserId(userId, from, size).stream()
                 .map(item -> ItemMapper.toItemReturnDto(item,
                         bookingService.getLastBookingByItem(item),
                         bookingService.getNextBookingByItem(item)))
@@ -85,11 +92,15 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestHeader(USER_ID_HEADER) Long userId,
-                                @RequestParam(name = "text") String text) {
+                                @RequestParam(name = "text") String text,
+                                @PositiveOrZero
+                                @RequestParam(name = "from", defaultValue = "0") int from,
+                                @Positive
+                                @RequestParam(name = "size", defaultValue = "5") int size) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemService.getAllByTemplate(text).stream()
+        return itemService.getAllByTemplate(text, from, size).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
