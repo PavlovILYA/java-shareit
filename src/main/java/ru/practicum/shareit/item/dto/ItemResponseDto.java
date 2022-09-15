@@ -16,6 +16,7 @@ public class ItemResponseDto {
     private BookingDto lastBooking;
     private BookingDto nextBooking;
     private List<CommentResponseDto> comments;
+    private Long requestId;
 
     @Data
     @AllArgsConstructor

@@ -19,4 +19,5 @@ public class ItemDto {
     private String description;
     @NotNull(groups = {CreateValidationGroup.class})
     private Boolean available;
+    private Long requestId;
 }

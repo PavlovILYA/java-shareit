@@ -18,7 +18,8 @@ public class ItemMapper {
         return new ItemDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable());
+                item.getAvailable(),
+                null); // temp
     }
 
     public static Item toItem(ItemDto itemDto, User owner) {
@@ -27,7 +28,8 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 owner,
-                null); // comments
+                null, // comments
+                null); // temp
     }
 
     public static ItemResponseDto toItemReturnDto(Item item,
@@ -41,7 +43,8 @@ public class ItemMapper {
                 getBookingDtoIfExist(nextBooking),
                 item.getComments().stream()
                         .map(ItemMapper::toCommentReturnDto)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()),
+                null); // item.getItemRequest().getId()
     }
 
     public static Comment toComment(CommentCreateDto commentCreateDto, User author, Item item) {
