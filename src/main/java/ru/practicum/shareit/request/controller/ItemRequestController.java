@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.RequestMapper;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -11,9 +12,12 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Validated
 @RestController
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
@@ -41,9 +45,14 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestResponseDto> getAlienRequests(@RequestHeader(USER_ID_HEADER) Long userId,
-                                                         @RequestParam("from") Long from,
-                                                         @RequestParam("size") Long size) {
-        return null;
+                                                         @PositiveOrZero
+                                                         @RequestParam(value = "from", defaultValue = "0") int from,
+                                                         @Positive
+                                                         @RequestParam(value = "size", defaultValue = "5") int size) {
+        User requester = userService.getUser(userId);
+        return requestService.getAllAlien(requester, from, size).stream()
+                .map(RequestMapper::toRequestDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{requestId}")

@@ -17,6 +17,7 @@ import ru.practicum.shareit.request.exception.RequestNotFoundException;
 import ru.practicum.shareit.user.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -27,7 +28,8 @@ public class ErrorHandler {
                        MissingRequestHeaderException.class,
                        UnavailableItemException.class,
                        BookingValidationException.class,
-                       InvalidBookingStatusException.class})
+                       InvalidBookingStatusException.class,
+                       ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle400Exception(final Exception e) {
         log.error("Response HTTP {} {}", HttpStatus.BAD_REQUEST.value(), e.getMessage());

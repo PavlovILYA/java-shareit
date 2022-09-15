@@ -10,5 +10,7 @@ public interface RequestService {
 
     List<ItemRequest> getAllByRequester(User requester);
 
+    List<ItemRequest> getAllAlien(User requester, int from, int size);
+
     ItemRequest getRequestById(Long requestId);
 }
