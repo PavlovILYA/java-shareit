@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -14,8 +15,9 @@ import java.util.List;
 @Entity
 @Table(name = "items")
 @Data
-@AllArgsConstructor
+@Builder(toBuilder = true)
 @NoArgsConstructor
+@AllArgsConstructor
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +32,7 @@ public class Item {
     @OneToMany(mappedBy = "item")
     private List<Comment> comments = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(table = "items", name = "request_id")
+    @JoinColumn(table = "items", name = "request_id", updatable = false)
     @JsonIgnore
     private ItemRequest itemRequest;
 }

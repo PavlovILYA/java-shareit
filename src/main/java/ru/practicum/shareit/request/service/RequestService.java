@@ -4,4 +4,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 
 public interface RequestService {
     ItemRequest saveRequest(ItemRequest itemRequest);
+
+    ItemRequest getRequestById(Long requestId);
 }

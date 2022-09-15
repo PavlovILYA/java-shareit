@@ -15,6 +15,8 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.RequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -33,12 +35,16 @@ public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
     private final BookingService bookingService;
+    private final RequestService requestService;
 
     @PostMapping
     public ItemDto saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
                             @Validated({CreateValidationGroup.class}) @RequestBody ItemDto itemDto) {
         User owner = userService.getUser(userId);
-        Item item = ItemMapper.toItem(itemDto, owner);
+        ItemRequest itemRequest = itemDto.getRequestId() == null
+                ? null
+                : requestService.getRequestById(itemDto.getRequestId());
+        Item item = ItemMapper.toItem(itemDto, owner, itemRequest);
         return ItemMapper.toItemDto(itemService.saveItem(item));
     }
 
@@ -49,7 +55,7 @@ public class ItemController {
         validate(itemDto);
         itemDto.setId(itemId);
         User owner = userService.getUser(userId);
-        Item item = ItemMapper.toItem(itemDto, owner);
+        Item item = ItemMapper.toItem(itemDto, owner, null);
         return ItemMapper.toItemDto(itemService.updateItem(item));
     }
 

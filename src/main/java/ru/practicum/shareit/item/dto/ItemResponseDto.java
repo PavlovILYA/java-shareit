@@ -1,12 +1,14 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class ItemResponseDto {
     private Long id;

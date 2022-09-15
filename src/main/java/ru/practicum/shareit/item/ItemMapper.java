@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDate;
@@ -15,36 +16,41 @@ import java.util.stream.Collectors;
 
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
-        return new ItemDto(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                null); // temp
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
+                .build();
     }
 
-    public static Item toItem(ItemDto itemDto, User owner) {
-        return new Item(itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                owner,
-                null, // comments
-                null); // temp
+    public static Item toItem(ItemDto itemDto, User owner, ItemRequest itemRequest) {
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description((itemDto.getDescription()))
+                .available(itemDto.getAvailable())
+                .owner(owner)
+                .itemRequest(itemRequest)
+                .build();
     }
 
     public static ItemResponseDto toItemReturnDto(Item item,
                                                   Optional<Booking> lastBooking,
                                                   Optional<Booking> nextBooking) {
-        return new ItemResponseDto(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                getBookingDtoIfExist(lastBooking),
-                getBookingDtoIfExist(nextBooking),
-                item.getComments().stream()
+        return ItemResponseDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .lastBooking(getBookingDtoIfExist(lastBooking))
+                .nextBooking(getBookingDtoIfExist(nextBooking))
+                .comments(item.getComments().stream()
                         .map(ItemMapper::toCommentReturnDto)
-                        .collect(Collectors.toList()),
-                null); // item.getItemRequest().getId()
+                        .collect(Collectors.toList()))
+                .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
+                .build();
     }
 
     public static Comment toComment(CommentCreateDto commentCreateDto, User author, Item item) {
