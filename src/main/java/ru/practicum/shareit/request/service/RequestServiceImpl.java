@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.request.exception.RequestNotFoundException;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.RequestRepository;
+import ru.practicum.shareit.user.model.User;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +17,11 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public ItemRequest saveRequest(ItemRequest itemRequest) {
         return requestRepository.save(itemRequest);
+    }
+
+    @Override
+    public List<ItemRequest> getAllByRequester(User requester) {
+        return requestRepository.findAllByRequester(requester);
     }
 
     @Override

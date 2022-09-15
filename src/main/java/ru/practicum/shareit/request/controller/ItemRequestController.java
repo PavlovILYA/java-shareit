@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/requests")
@@ -32,7 +33,10 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestResponseDto> getMyRequests(@RequestHeader(USER_ID_HEADER) Long userId) {
-        return null;
+        User requester = userService.getUser(userId);
+        return requestService.getAllByRequester(requester).stream()
+                .map(RequestMapper::toRequestDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/all")
