@@ -23,7 +23,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ItemRequest> getAllByRequester(User requester) {
-        return requestRepository.findAllByRequester(requester);
+        return requestRepository.findAllByRequesterOrderByCreatedDesc(requester);
     }
 
     @Override
