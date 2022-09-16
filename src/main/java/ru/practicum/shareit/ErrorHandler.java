@@ -14,7 +14,6 @@ import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.request.exception.RequestNotFoundException;
-import ru.practicum.shareit.user.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import javax.validation.ConstraintViolationException;
@@ -34,13 +33,6 @@ public class ErrorHandler {
     public ErrorResponse handle400Exception(final Exception e) {
         log.error("Response HTTP {} {}", HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handle409Exception(final EmailAlreadyExistsException e) {
-        log.error("Response HTTP {} {}", HttpStatus.CONFLICT.value(), e.getMessage());
-        return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), e.getMessage());
     }
 
     @ExceptionHandler({UserNotFoundException.class,
