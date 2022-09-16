@@ -43,7 +43,7 @@ public class BookingController {
         Item item = itemService.getItem(bookingCreateDto.getItemId());
         User booker = userService.getUser(userId);
         compareBookerAndItemOwner(booker, item);
-        Booking booking = BookingMapper.fromBookingCreateDto(bookingCreateDto, item, booker);
+        Booking booking = BookingMapper.toBooking(bookingCreateDto, item, booker);
         return BookingMapper.toBookingCreateDto(
                 bookingService.saveBooking(booking));
     }
@@ -52,14 +52,14 @@ public class BookingController {
     public BookingResponseDto approveBooking(@PathVariable("bookingId") Long bookingId,
                                              @RequestParam("approved") Boolean approved,
                                              @RequestHeader(USER_ID_HEADER) Long userId) {
-        return BookingMapper.toBookingReturnDto(
+        return BookingMapper.toBookingResponseDto(
                 bookingService.approveBooking(bookingId, approved, userId));
     }
 
     @GetMapping("/{bookingId}")
     public BookingResponseDto getBooking(@PathVariable("bookingId") Long bookingId,
                                          @RequestHeader(USER_ID_HEADER) Long userId) {
-        return BookingMapper.toBookingReturnDto(
+        return BookingMapper.toBookingResponseDto(
                 bookingService.getBookingById(bookingId, userId));
     }
 
@@ -72,7 +72,7 @@ public class BookingController {
                                                          @RequestParam(name = "size", defaultValue = "5") int size) {
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingRequestsByUserId(userId, bookingState, from, size).stream()
-                .map(BookingMapper::toBookingReturnDto)
+                .map(BookingMapper::toBookingResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -85,7 +85,7 @@ public class BookingController {
                                                   @RequestParam(name = "size", defaultValue = "5") int size) {
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingsByOwnerId(userId, bookingState, from, size).stream()
-                .map(BookingMapper::toBookingReturnDto)
+                .map(BookingMapper::toBookingResponseDto)
                 .collect(Collectors.toList());
     }
 

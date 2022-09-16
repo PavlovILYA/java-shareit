@@ -26,7 +26,7 @@ public class RequestMapper {
         List<ItemResponseDto> items = null;
         if (itemRequest.getItems() != null) {
             items = itemRequest.getItems().stream()
-                    .map(item -> ItemMapper.toItemReturnDto(item, Optional.empty(), Optional.empty()))
+                    .map(item -> ItemMapper.toItemResponseDto(item, Optional.empty(), Optional.empty()))
                     .collect(Collectors.toList());
         }
         return ItemRequestResponseDto.builder()

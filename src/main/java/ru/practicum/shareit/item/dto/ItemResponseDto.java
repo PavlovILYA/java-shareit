@@ -9,7 +9,6 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-@AllArgsConstructor
 public class ItemResponseDto {
     private Long id;
     private String name;
@@ -21,6 +20,7 @@ public class ItemResponseDto {
     private Long requestId;
 
     @Data
+    @Builder(toBuilder = true)
     @AllArgsConstructor
     public static class BookingDto {
         private Long id;

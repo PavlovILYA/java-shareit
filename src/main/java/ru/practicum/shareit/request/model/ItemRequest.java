@@ -14,9 +14,9 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "requests")
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

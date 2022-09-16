@@ -36,9 +36,9 @@ public class ItemMapper {
                 .build();
     }
 
-    public static ItemResponseDto toItemReturnDto(Item item,
-                                                  Optional<Booking> lastBooking,
-                                                  Optional<Booking> nextBooking) {
+    public static ItemResponseDto toItemResponseDto(Item item,
+                                                    Optional<Booking> lastBooking,
+                                                    Optional<Booking> nextBooking) {
         return ItemResponseDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -47,36 +47,41 @@ public class ItemMapper {
                 .lastBooking(getBookingDtoIfExist(lastBooking))
                 .nextBooking(getBookingDtoIfExist(nextBooking))
                 .comments(item.getComments().stream()
-                        .map(ItemMapper::toCommentReturnDto)
+                        .map(ItemMapper::toCommentResponseDto)
                         .collect(Collectors.toList()))
                 .requestId(item.getItemRequest() == null ? null : item.getItemRequest().getId())
                 .build();
     }
 
     public static Comment toComment(CommentCreateDto commentCreateDto, User author, Item item) {
-        return new Comment(null,
-                commentCreateDto.getText(),
-                item,
-                author,
-                LocalDate.now());
+        return Comment.builder()
+                .text(commentCreateDto.getText())
+                .item(item)
+                .author(author)
+                .created(LocalDate.now())
+                .build();
     }
 
-    public static CommentResponseDto toCommentReturnDto(Comment comment) {
-        return new CommentResponseDto(comment.getId(),
-                comment.getText(),
-                comment.getItem().getName(),
-                comment.getAuthor().getName(),
-                comment.getCreated());
+    public static CommentResponseDto toCommentResponseDto(Comment comment) {
+        return CommentResponseDto.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .itemName(comment.getItem().getName())
+                .authorName(comment.getAuthor().getName())
+                .created(comment.getCreated())
+                .build();
     }
 
     private static ItemResponseDto.BookingDto getBookingDtoIfExist(Optional<Booking> booking) {
         if (booking.isEmpty()) {
             return null;
         } else {
-            return new ItemResponseDto.BookingDto(booking.get().getId(),
-                    booking.get().getStart(),
-                    booking.get().getEnd(),
-                    booking.get().getBooker().getId());
+            return ItemResponseDto.BookingDto.builder()
+                    .id(booking.get().getId())
+                    .start(booking.get().getStart())
+                    .end(booking.get().getEnd())
+                    .bookerId(booking.get().getBooker().getId())
+                    .build();
         }
     }
 }

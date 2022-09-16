@@ -10,9 +10,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class ItemDto {
     private Long id;
     @NotNull(groups = {CreateValidationGroup.class})

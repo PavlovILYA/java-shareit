@@ -67,11 +67,11 @@ public class ItemController {
                                    @PathVariable("itemId") Long itemId) {
         Item item = itemService.getItem(itemId);
         if (item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemReturnDto(item,
+            return ItemMapper.toItemResponseDto(item,
                     bookingService.getLastBookingByItem(item),
                     bookingService.getNextBookingByItem(item));
         } else {
-            return ItemMapper.toItemReturnDto(item,
+            return ItemMapper.toItemResponseDto(item,
                     Optional.empty(),
                     Optional.empty());
         }
@@ -84,7 +84,7 @@ public class ItemController {
                                             @Positive
                                             @RequestParam(name = "size", defaultValue = "5") int size) {
         return itemService.getAllByUserId(userId, from, size).stream()
-                .map(item -> ItemMapper.toItemReturnDto(item,
+                .map(item -> ItemMapper.toItemResponseDto(item,
                         bookingService.getLastBookingByItem(item),
                         bookingService.getNextBookingByItem(item)))
                 .collect(Collectors.toList());
@@ -112,7 +112,7 @@ public class ItemController {
         User author = userService.getUser(userId);
         Item item = itemService.getItem(itemId);
         Comment comment = ItemMapper.toComment(commentCreateDto, author, item);
-        return ItemMapper.toCommentReturnDto(itemService.saveComment(comment));
+        return ItemMapper.toCommentResponseDto(itemService.saveComment(comment));
     }
 
     private void validate(ItemDto itemDto) {
