@@ -25,7 +25,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Validated
@@ -66,15 +65,9 @@ public class ItemController {
     public ItemResponseDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                    @PathVariable("itemId") Long itemId) {
         Item item = itemService.getItem(itemId);
-        if (item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemResponseDto(item,
-                    bookingService.getLastBookingByItem(item),
-                    bookingService.getNextBookingByItem(item));
-        } else {
-            return ItemMapper.toItemResponseDto(item,
-                    Optional.empty(),
-                    Optional.empty());
-        }
+        return ItemMapper.toItemResponseDto(item,
+                item.getOwner().getId().equals(userId) ? bookingService.getLastBookingByItem(item) : null,
+                item.getOwner().getId().equals(userId) ? bookingService.getNextBookingByItem(item) : null);
     }
 
     @GetMapping

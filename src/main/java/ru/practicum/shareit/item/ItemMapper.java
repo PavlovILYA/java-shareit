@@ -11,7 +11,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ItemMapper {
@@ -37,8 +36,8 @@ public class ItemMapper {
     }
 
     public static ItemResponseDto toItemResponseDto(Item item,
-                                                    Optional<Booking> lastBooking,
-                                                    Optional<Booking> nextBooking) {
+                                                    Booking lastBooking,
+                                                    Booking nextBooking) {
         return ItemResponseDto.builder()
                 .id(item.getId())
                 .name(item.getName())
@@ -72,16 +71,14 @@ public class ItemMapper {
                 .build();
     }
 
-    private static ItemResponseDto.BookingDto getBookingDtoIfExist(Optional<Booking> booking) {
-        if (booking.isEmpty()) {
-            return null;
-        } else {
-            return ItemResponseDto.BookingDto.builder()
-                    .id(booking.get().getId())
-                    .start(booking.get().getStart())
-                    .end(booking.get().getEnd())
-                    .bookerId(booking.get().getBooker().getId())
-                    .build();
-        }
+    private static ItemResponseDto.BookingDto getBookingDtoIfExist(Booking booking) {
+        return booking == null
+                ? null
+                : ItemResponseDto.BookingDto.builder()
+                .id(booking.getId())
+                .start(booking.getStart())
+                .end(booking.getEnd())
+                .bookerId(booking.getBooker().getId())
+                .build();
     }
 }

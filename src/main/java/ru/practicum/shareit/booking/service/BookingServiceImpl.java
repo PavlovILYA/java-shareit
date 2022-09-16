@@ -19,7 +19,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -116,15 +115,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Optional<Booking> getLastBookingByItem(Item item) {
+    public Booking getLastBookingByItem(Item item) {
         return bookingRepository.findAllPastOrCurrentByItemDesc(item, PageRequest.of(0, 1)).stream()
-                .findFirst();
+                .findFirst().orElse(null);
     }
 
     @Override
-    public Optional<Booking> getNextBookingByItem(Item item) {
+    public Booking getNextBookingByItem(Item item) {
         return bookingRepository.findAllFutureByItemAsc(item, PageRequest.of(0, 1)).stream()
-                .findFirst();
+                .findFirst().orElse(null);
     }
 
     private void checkBookingBeforeApprove(Booking booking, BookingStatus newStatus, Long ownerId) {

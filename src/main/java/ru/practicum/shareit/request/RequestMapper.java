@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class RequestMapper {
@@ -26,7 +25,7 @@ public class RequestMapper {
         List<ItemResponseDto> items = null;
         if (itemRequest.getItems() != null) {
             items = itemRequest.getItems().stream()
-                    .map(item -> ItemMapper.toItemResponseDto(item, Optional.empty(), Optional.empty()))
+                    .map(item -> ItemMapper.toItemResponseDto(item, null, null))
                     .collect(Collectors.toList());
         }
         return ItemRequestResponseDto.builder()
