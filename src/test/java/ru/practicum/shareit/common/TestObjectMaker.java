@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -140,6 +141,29 @@ public class TestObjectMaker {
                 .item(item)
                 .author(author)
                 .created(created)
+                .build();
+    }
+
+    public static ItemRequest makeItemRequest(Long id, String description, LocalDateTime created,
+                                              User requester, List<Item> items) {
+        return ItemRequest.builder()
+                .id(id)
+                .description(description)
+                .created(created)
+                .requester(requester)
+                .items(items)
+                .build();
+    }
+
+    public static ItemRequestResponseDto makeItemRequestResponseDto(Long id, String description,
+                                                                    LocalDateTime created, User requester,
+                                                                    List<ItemResponseDto> items) {
+        return ItemRequestResponseDto.builder()
+                .id(id)
+                .description(description)
+                .created(created)
+                .requester(new UserDto(requester.getId(), requester.getName(), requester.getEmail()))
+                .items(items)
                 .build();
     }
 }
