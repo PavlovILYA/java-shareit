@@ -85,7 +85,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestHeader(USER_ID_HEADER) Long userId,
-                                @RequestParam(name = "text") String text,
+                                @RequestParam(name = "text", defaultValue = "") String text,
                                 @PositiveOrZero
                                 @RequestParam(name = "from", defaultValue = "0") int from,
                                 @Positive

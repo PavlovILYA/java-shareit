@@ -1,12 +1,10 @@
 package ru.practicum.shareit.user.controller;
 
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -25,22 +23,23 @@ import java.util.List;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static ru.practicum.shareit.common.TestObjectMaker.*;
+
 @WebMvcTest(UserController.class)
-@AutoConfigureMockMvc
-@RequiredArgsConstructor
 public class UserControllerTest {
-    @MockBean
-    private UserService userService;
     @Autowired
     private MockMvc mockMvc;
+    @MockBean
+    private UserService userService;
     @Captor
     private ArgumentCaptor<User> captor;
+
     private final Gson gson = new Gson();
 
     @Test
     public void checkGetAll() throws Exception {
-        List<User> users = List.of(makeUserWithId(1L, "Ivan", "ivan@ya.ru"),
-                makeUserWithId(2L, "Ivana", "ivana@ya.ru"));
+        List<User> users = List.of(makeUser(1L, "Ivan", "ivan@ya.ru"),
+                makeUser(2L, "Ivana", "ivana@ya.ru"));
         when(userService.getAll()).thenReturn(users);
 
         mockMvc.perform(get("/users"))
@@ -52,12 +51,12 @@ public class UserControllerTest {
 
     @Test
     public void checkSaveUser() throws Exception {
-        User userForSave = makeUserWithId(null, "Tom", "tom@ya.ru");
-        User savedUser = makeUserWithId(2L, "Tom", "tom@ya.ru");
+        User userForSave = makeUser(null, "Tom", "tom@ya.ru");
+        User savedUser = makeUser(2L, "Tom", "tom@ya.ru");
         when(userService.saveUser(userForSave)).thenReturn(savedUser);
 
-        UserDto userDtoForSave = makeUserDtoWithId(null, "Tom", "tom@ya.ru");
-        UserDto savedUserDto = makeUserDtoWithId(2L, "Tom", "tom@ya.ru");
+        UserDto userDtoForSave = makeUserDto(null, "Tom", "tom@ya.ru");
+        UserDto savedUserDto = makeUserDto(2L, "Tom", "tom@ya.ru");
 
         mockMvc.perform(post("/users")
                         .content(gson.toJson(userDtoForSave))
@@ -74,8 +73,8 @@ public class UserControllerTest {
     }
 
     @Test
-    public void checkUpdateUser_ValidException() throws Exception {
-        UserDto userDtoForSave = makeUserDtoWithId(2L, "", "tom@ya.ru");
+    public void checkUpdateUser_validException() throws Exception {
+        UserDto userDtoForSave = makeUserDto(2L, "", "tom@ya.ru");
         mockMvc.perform(patch("/users/{userId}", 2L)
                         .content(gson.toJson(userDtoForSave))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,10 +86,10 @@ public class UserControllerTest {
 
     @Test
     public void checkUpdateUser_updated() throws Exception {
-        User userForUpdate = makeUserWithId(2L, "Tom", "tom@ya.ru");
+        User userForUpdate = makeUser(2L, "Tom", "tom@ya.ru");
         when(userService.updateUser(userForUpdate)).thenReturn(userForUpdate);
 
-        UserDto userDtoForSave = makeUserDtoWithId(2L, "Tom", "tom@ya.ru");
+        UserDto userDtoForSave = makeUserDto(2L, "Tom", "tom@ya.ru");
 
         mockMvc.perform(patch("/users/{userId}", 2L)
                         .content(gson.toJson(userDtoForSave))
@@ -117,10 +116,10 @@ public class UserControllerTest {
 
     @Test
     public void checkGetUser() throws Exception {
-        User user = makeUserWithId(2L, "Tom", "tom@ya.ru");
+        User user = makeUser(2L, "Tom", "tom@ya.ru");
         when(userService.getUser(2L)).thenReturn(user);
 
-        UserDto userDto = makeUserDtoWithId(2L, "Tom", "tom@ya.ru");
+        UserDto userDto = makeUserDto(2L, "Tom", "tom@ya.ru");
 
         mockMvc.perform(get("/users/{userId}", 2L)
                         .accept(MediaType.APPLICATION_JSON))
@@ -130,21 +129,5 @@ public class UserControllerTest {
         verify(userService).getUser(2L);
 
         verifyNoMoreInteractions(userService);
-    }
-
-    private User makeUserWithId(Long id, String name, String email) {
-        return User.builder()
-                .id(id)
-                .name(name)
-                .email(email)
-                .build();
-    }
-
-    private UserDto makeUserDtoWithId(Long id, String name, String email) {
-        return UserDto.builder()
-                .id(id)
-                .name(name)
-                .email(email)
-                .build();
     }
 }
