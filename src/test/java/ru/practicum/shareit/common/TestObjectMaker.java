@@ -1,5 +1,6 @@
 package ru.practicum.shareit.common;
 
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -96,6 +97,16 @@ public class TestObjectMaker {
                 .status(status)
                 .item(item)
                 .booker(booker)
+                .build();
+    }
+
+    public static BookingCreateDto makeBookingCreateDto(LocalDateTime start, LocalDateTime end,
+                                                        Long itemId, Long userId) {
+        return BookingCreateDto.builder()
+                .start(start)
+                .end(end)
+                .itemId(itemId)
+                .userId(userId)
                 .build();
     }
 
