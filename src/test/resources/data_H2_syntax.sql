@@ -26,7 +26,8 @@ INSERT INTO items (name, description, available, owner_id, request_id)
            ('Дрель', 'На аккумуляторе', true, 3, null),
            ('Чайник электрический', 'На 1.5 литров', true, 3, null),
            ('Мультиварка', 'В хорошем состоянии', true, 3, null),
-           ('Фотоаппарат', 'Пленочный', true, 3, null);
+           ('Фотоаппарат', 'Пленочный', true, 3, null),
+           ('Фото- и видеокамера', 'Nikon', true, 1, null);
 
 INSERT INTO bookings (start_date, end_date, item_id, booker_id, status)
     VALUES (TIMESTAMPADD(DAY, -7, CURRENT_TIMESTAMP), TIMESTAMPADD(DAY, 7, CURRENT_TIMESTAMP), 2, 2, 'APPROVED'),
