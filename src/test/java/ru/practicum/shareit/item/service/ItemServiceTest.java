@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.exception.InvalidOwnerException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -81,6 +82,18 @@ class ItemServiceTest {
 
         verify(itemRepository).findById(item.getId());
         verifyNoMoreInteractions(itemRepository);
+    }
+
+    @Test
+    public void checkUpdateItem_invalidOwnerException() {
+        User user1 = makeUser(1L, "Dmitry", "dmitry@ya.ru");
+        User user2 = makeUser(2L, "Oleg", "oleg@ya.ru");
+        Item item1 = makeItem(1L, "item before", "description before", true, user1, null, null);
+        Item item2 = makeItem(1L, "item after", "description after", true, user2, null, null);
+        when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(item2));
+
+        final var thrown = assertThrows(InvalidOwnerException.class, () -> itemService.updateItem(item1));
+        assertEquals("Correct owner is " + item2.getOwner() + " but there is " + item1.getOwner(), thrown.getMessage());
     }
 
     @Test

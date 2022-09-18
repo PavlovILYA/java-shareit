@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -59,6 +61,54 @@ class BookingServiceTest {
         assertEquals("Item " + 1L + " is unavailable now", thrown.getMessage());
 
         verifyNoInteractions(bookingRepository);
+    }
+
+    @Test
+    public void checkApproveBooking() {
+        User booker = makeUser(1L, "Maria", "maria@ya.ru");
+        Item item = makeItem(1L, "item", "description", true, booker, null, null);
+        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
+        Booking bookingAfterApprove = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.APPROVED, item, booker);
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(bookingAfterApprove)).thenReturn(bookingAfterApprove);
+
+        Booking bookingFromDb = bookingService.approveBooking(booking.getId(), true, booker.getId());
+        assertEquals(bookingAfterApprove, bookingFromDb);
+
+        verify(bookingRepository).findById(booking.getId());
+        verify(bookingRepository).save(bookingAfterApprove);
+        verifyNoMoreInteractions(bookingRepository);
+    }
+
+    @Test
+    public void checkApproveBooking_accessException() {
+        User booker = makeUser(1L, "Maria", "maria@ya.ru");
+        User owner = makeUser(2L, "Oleg", "oleg@ya.ru");
+        Item item = makeItem(1L, "item", "description", true, owner, null, null);
+        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+
+        final var thrown = assertThrows(ItemNotFoundException.class, () -> bookingService.approveBooking(booking.getId(), true, booker.getId()));
+        assertEquals("Item " + booking.getItem().getId() +
+                " from booking " + booking.getId() + " doesn't belong you", thrown.getMessage());
+
+        verify(bookingRepository).findById(booking.getId());
+        verifyNoMoreInteractions(bookingRepository);
+    }
+
+    @Test
+    public void checkApproveBooking_alreadyApprovedException() {
+        User booker = makeUser(1L, "Maria", "maria@ya.ru");
+        Item item = makeItem(1L, "item", "description", true, booker, null, null);
+        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.APPROVED, item, booker);
+        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+
+        final var thrown = assertThrows(BookingValidationException.class, () -> bookingService.approveBooking(booking.getId(), true, booker.getId()));
+        assertEquals("Booking " + booking.getId() +
+                " is already " + BookingStatus.APPROVED, thrown.getMessage());
+
+        verify(bookingRepository).findById(booking.getId());
+        verifyNoMoreInteractions(bookingRepository);
     }
 
     @Test
