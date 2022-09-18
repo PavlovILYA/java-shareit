@@ -26,34 +26,38 @@ class RequestServiceTest {
     @Mock
     private RequestRepository requestRepository;
 
+    private User requester;
+    private ItemRequest requestWithoutId;
+    private ItemRequest request;
+
     @BeforeEach
     void setUp() {
         requestService = new RequestServiceImpl(requestRepository);
+        requester = makeUser(1L, "Olya", "olya@ya.ru");
+        requestWithoutId = makeItemRequest(null, "description",
+                LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
+        request = makeItemRequest(1L, "description",
+                LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
     }
 
     @Test
     public void checkSaveRequest() {
-        User requester = makeUser(1L, "Olya", "olya@ya.ru");
-        ItemRequest itemRequestBeforeSave = makeItemRequest(null, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
-        ItemRequest itemRequestAfterSave = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
-        when(requestRepository.save(itemRequestBeforeSave)).thenReturn(itemRequestAfterSave);
+        when(requestRepository.save(requestWithoutId)).thenReturn(request);
 
-        ItemRequest savedRequest = requestService.saveRequest(itemRequestBeforeSave);
-        assertEquals(itemRequestAfterSave, savedRequest);
+        ItemRequest savedRequest = requestService.saveRequest(requestWithoutId);
+        assertEquals(request, savedRequest);
 
-        verify(requestRepository).save(itemRequestBeforeSave);
+        verify(requestRepository).save(requestWithoutId);
         verifyNoMoreInteractions(requestRepository);
     }
 
     @Test
     public void checkGetAllByRequester() {
-        User requester = makeUser(1L, "Olya", "olya@ya.ru");
-        ItemRequest itemRequest = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
-        when(requestRepository.findAllByRequesterOrderByCreatedDesc(requester)).thenReturn(List.of(itemRequest));
+        when(requestRepository.findAllByRequesterOrderByCreatedDesc(requester)).thenReturn(List.of(request));
 
         List<ItemRequest> requests = requestService.getAllByRequester(requester);
         assertEquals(1, requests.size());
-        assertEquals(itemRequest, requests.get(0));
+        assertEquals(request, requests.get(0));
 
         verify(requestRepository).findAllByRequesterOrderByCreatedDesc(requester);
         verifyNoMoreInteractions(requestRepository);
@@ -66,12 +70,10 @@ class RequestServiceTest {
 
     @Test
     public void checkGetRequestById() {
-        User requester = makeUser(1L, "Olya", "olya@ya.ru");
-        ItemRequest itemRequest = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
-        when(requestRepository.findById(requester.getId())).thenReturn(Optional.of(itemRequest));
+        when(requestRepository.findById(requester.getId())).thenReturn(Optional.of(request));
 
         ItemRequest requestFromDb = requestService.getRequestById(requester.getId());
-        assertEquals(itemRequest, requestFromDb);
+        assertEquals(request, requestFromDb);
 
         verify(requestRepository).findById(requester.getId());
         verifyNoMoreInteractions(requestRepository);
@@ -81,7 +83,8 @@ class RequestServiceTest {
     public void checkGetRequestById_requestNotFoundException() {
         when(requestRepository.findById(any())).thenReturn(Optional.empty());
 
-        final var thrown = assertThrows(RequestNotFoundException.class, () -> requestService.getRequestById(1L));
+        final var thrown = assertThrows(RequestNotFoundException.class,
+                () -> requestService.getRequestById(1L));
         assertEquals("Item request " + 1L + " not found", thrown.getMessage());
 
         verify(requestRepository).findById(any());

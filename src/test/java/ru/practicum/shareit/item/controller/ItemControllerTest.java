@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.controller;
 
 import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -56,6 +57,26 @@ class ItemControllerTest {
     @MockBean
     private RequestService requestService;
 
+    private User user;
+    private Item itemWithoutId;
+    private Item item;
+    private ItemDto itemDtoWithoutId;
+    private ItemDto itemDto;
+    private ItemResponseDto itemResponseDto;
+
+    @BeforeEach
+    void setUp() {
+        user = makeUser(2L, "Igor", "igor@ya.ru");
+        itemWithoutId = makeItem(null, "item1", "description1", true, user,
+                Collections.emptyList(), null);
+        item = makeItem(1L, "item1", "description1", true, user,
+                Collections.emptyList(), null);
+        itemDtoWithoutId = makeItemDto(null, "item1", "description1", true, null);
+        itemDto = makeItemDto(1L, "item1", "description1", true, null);
+        itemResponseDto = makeItemResponseDto(1L, "item1", "description1", true,
+                null, null, null, Collections.emptyList());
+    }
+
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
@@ -63,26 +84,19 @@ class ItemControllerTest {
 
     @Test
     public void checkSaveItem_withoutRequest() throws Exception {
-        User user = makeUser(2L, "Igor", "igor@ya.ru");
-        when(userService.getUser(2L)).thenReturn(user);
-
-        Item itemBeforeSave = makeItem(null, "item1", "description1", true, user, null, null);
-        Item itemAfterSave = makeItem(1L, "item1", "description1", true, user, null, null);
-        when(itemService.saveItem(itemBeforeSave)).thenReturn(itemAfterSave);
-
-        ItemDto itemDtoBeforeSave = makeItemDto(null, "item1", "description1", true, null);
-        ItemDto itemDtoAfterSave = makeItemDto(1L, "item1", "description1", true, null);
+        when(userService.getUser(user.getId())).thenReturn(user);
+        when(itemService.saveItem(itemWithoutId)).thenReturn(item);
 
         mockMvc.perform(post("/items")
-                        .content(gson.toJson(itemDtoBeforeSave))
+                        .content(gson.toJson(itemDtoWithoutId))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L)
+                        .header(USER_ID_HEADER, user.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json((gson.toJson(itemDtoAfterSave))));
+                .andExpect(content().json((gson.toJson(itemDto))));
 
-        verify(userService).getUser(2L);
-        verify(itemService).saveItem(itemBeforeSave);
+        verify(userService).getUser(user.getId());
+        verify(itemService).saveItem(itemWithoutId);
         verifyNoMoreInteractions(userService);
         verifyNoMoreInteractions(itemService);
         verifyNoInteractions(requestService);
@@ -90,30 +104,30 @@ class ItemControllerTest {
 
     @Test
     public void checkSaveItem_withRequest() throws Exception {
-        User user = makeUser(2L, "Igor", "igor@ya.ru");
-        User requester = makeUser(3L, "Nick", "nick@ya.ru");
-        when(userService.getUser(2L)).thenReturn(user);
+        when(userService.getUser(user.getId())).thenReturn(user);
 
-        ItemRequest itemRequest = makeRequest(3L, "some request", LocalDateTime.of(2022, 9, 11, 10, 10, 10), requester, null);
+        User requester = makeUser(3L, "Nick", "nick@ya.ru");
+        ItemRequest itemRequest = makeRequest(3L, "some request",
+                LocalDateTime.of(2022, 9, 11, 10, 10, 10), requester, null);
         when(requestService.getRequestById(3L)).thenReturn(itemRequest);
 
-        Item itemBeforeSave = makeItem(null, "item1", "description1", true, user, null, itemRequest);
-        Item itemAfterSave = makeItem(1L, "item1", "description1", true, user, null, itemRequest);
-        when(itemService.saveItem(itemBeforeSave)).thenReturn(itemAfterSave);
+        itemWithoutId.setItemRequest(itemRequest);
+        item.setItemRequest(itemRequest);
+        when(itemService.saveItem(itemWithoutId)).thenReturn(item);
 
-        ItemDto itemDtoBeforeSave = makeItemDto(null, "item1", "description1", true, 3L);
-        ItemDto itemDtoAfterSave = makeItemDto(1L, "item1", "description1", true, 3L);
+        itemDtoWithoutId.setRequestId(itemRequest.getId());
+        itemDto.setRequestId(itemRequest.getId());
 
         mockMvc.perform(post("/items")
-                        .content(gson.toJson(itemDtoBeforeSave))
+                        .content(gson.toJson(itemDtoWithoutId))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L)
+                        .header(USER_ID_HEADER, user.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json((gson.toJson(itemDtoAfterSave))));
+                .andExpect(content().json((gson.toJson(itemDto))));
 
-        verify(userService).getUser(2L);
-        verify(itemService).saveItem(itemBeforeSave);
+        verify(userService).getUser(user.getId());
+        verify(itemService).saveItem(itemWithoutId);
         verify(requestService).getRequestById(3L);
         verifyNoMoreInteractions(userService);
         verifyNoMoreInteractions(itemService);
@@ -122,45 +136,40 @@ class ItemControllerTest {
 
     @Test
     public void checkUpdateItem() throws Exception {
-        User user = makeUser(2L, "Igor", "igor@ya.ru");
-        when(userService.getUser(2L)).thenReturn(user);
-
-        Item itemAfterUpdate = makeItem(1L, "item1", "description1", true, user, null, null);
-        when(itemService.updateItem(itemAfterUpdate)).thenReturn(itemAfterUpdate);
-
-        ItemDto itemDtoBeforeSave = makeItemDto(null, "item1", "description1", true, null);
-        ItemDto itemDtoAfterSave = makeItemDto(1L, "item1", "description1", true, null);
+        when(userService.getUser(user.getId())).thenReturn(user);
+        when(itemService.updateItem(item)).thenReturn(item);
 
         mockMvc.perform(patch("/items/{itemId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L)
+                        .header(USER_ID_HEADER, user.getId())
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(itemDtoBeforeSave)))
+                        .content(gson.toJson(itemDtoWithoutId)))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(itemDtoAfterSave)));
+                .andExpect(content().json(gson.toJson(itemDto)));
 
-        verify(userService).getUser(2L);
-        verify(itemService).updateItem(itemAfterUpdate);
+        verify(userService).getUser(user.getId());
+        verify(itemService).updateItem(item);
         verifyNoMoreInteractions(userService);
         verifyNoMoreInteractions(itemService);
     }
 
     @Test
     public void checkUpdateItem_validException() throws Exception {
-        ItemDto itemDtoBeforeSave = makeItemDto(null, "", "description1", true, null);
+        itemDto.setName("");
         mockMvc.perform(patch("/items/{itemId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L)
+                        .header(USER_ID_HEADER, user.getId())
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(itemDtoBeforeSave)))
+                        .content(gson.toJson(itemDto)))
                 .andExpect(status().isBadRequest());
 
-        itemDtoBeforeSave = makeItemDto(null, "item1", "", true, null);
+        itemDto.setName("name");
+        itemDto.setDescription("");
         mockMvc.perform(patch("/items/{itemId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L)
+                        .header(USER_ID_HEADER, user.getId())
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(gson.toJson(itemDtoBeforeSave)))
+                        .content(gson.toJson(itemDto)))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(userService);
@@ -169,40 +178,39 @@ class ItemControllerTest {
 
     @Test
     public void checkGetItem() throws Exception {
-        User user = makeUser(2L, "Igor", "igor@ya.ru");
-        Item item = makeItem(1L, "item1", "description1", true, user, Collections.emptyList(), null);
-        when(itemService.getItem(1L)).thenReturn(item);
-
-        ItemResponseDto itemDto = makeItemResponseDto(1L, "item1", "description1", true, null, null, null, Collections.emptyList());
+        when(itemService.getItem(item.getId())).thenReturn(item);
 
         mockMvc.perform(get("/items/{itemId}", 1L)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 3L))
+                        .header(USER_ID_HEADER, 3L))    // 1111!!!!!
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(itemDto)));
+                .andExpect(content().json(gson.toJson(itemResponseDto)));
 
-        verify(itemService).getItem(1L);
+        verify(itemService).getItem(item.getId());
         verifyNoMoreInteractions(itemService);
         verifyNoInteractions(bookingService);
     }
 
     @Test
     public void checkGetItem_withBookings() throws Exception {
-        User user = makeUser(2L, "Igor", "igor@ya.ru");
-        Item item = makeItem(1L, "item1", "description1", true, user, Collections.emptyList(), null);
-        Booking lastBooking = makeBooking(4L, LocalDateTime.of(2022, 9, 11, 10, 10, 10), LocalDateTime.of(2022, 9, 11, 20, 10, 10), BookingStatus.APPROVED, item, user);
-        Booking nextBooking = makeBooking(4L, LocalDateTime.of(2022, 10, 11, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 20, 10, 10), BookingStatus.WAITING, item, user);
-        when(itemService.getItem(1L)).thenReturn(item);
+        Booking lastBooking = makeBooking(4L, LocalDateTime.of(2022, 9, 11, 10, 10, 10),
+                LocalDateTime.of(2022, 9, 11, 20, 10, 10), BookingStatus.APPROVED, item, user);
+        Booking nextBooking = makeBooking(4L, LocalDateTime.of(2022, 10, 11, 10, 10, 10),
+                LocalDateTime.of(2022, 10, 11, 20, 10, 10), BookingStatus.WAITING, item, user);
+        when(itemService.getItem(item.getId())).thenReturn(item);
         when(bookingService.getLastBookingByItem(item)).thenReturn(lastBooking);
         when(bookingService.getNextBookingByItem(item)).thenReturn(nextBooking);
 
-        BookingResponseDto lastBookingDto = makeBookingResponseDto(4L, LocalDateTime.of(2022, 9, 11, 10, 10, 10), LocalDateTime.of(2022, 9, 11, 20, 10, 10), BookingStatus.APPROVED, item, user);
-        BookingResponseDto nextBookingDto = makeBookingResponseDto(4L, LocalDateTime.of(2022, 10, 11, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 20, 10, 10), BookingStatus.WAITING, item, user);
-        ItemResponseDto itemDto = makeItemResponseDto(1L, "item1", "description1", true, null, lastBookingDto, nextBookingDto, Collections.emptyList());
+        BookingResponseDto lastBookingDto = makeBookingResponseDto(4L, LocalDateTime.of(2022, 9, 11, 10, 10, 10),
+                LocalDateTime.of(2022, 9, 11, 20, 10, 10), BookingStatus.APPROVED, item, user);
+        BookingResponseDto nextBookingDto = makeBookingResponseDto(4L, LocalDateTime.of(2022, 10, 11, 10, 10, 10),
+                LocalDateTime.of(2022, 10, 11, 20, 10, 10), BookingStatus.WAITING, item, user);
+        ItemResponseDto itemDto = makeItemResponseDto(1L, "item1", "description1",
+                true, null, lastBookingDto, nextBookingDto, Collections.emptyList());
 
         mockMvc.perform(get("/items/{itemId}", 1L)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L))
+                        .header(USER_ID_HEADER, user.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(gson.toJson(itemDto)));
@@ -216,26 +224,21 @@ class ItemControllerTest {
 
     @Test
     public void checkGetMyItems() throws Exception {
-        User user = makeUser(1L, "Igor", "igor@ya.ru");
-        Item item1 = makeItem(1L, "item1", "description1", true, user, Collections.emptyList(), null);
-        Item item2 = makeItem(2L, "item2", "description2", false, user, Collections.emptyList(), null);
-        when(itemService.getAllByUserId(1L, 0, 2)).thenReturn(List.of(item1, item2));
+        when(itemService.getAllByUserId(user.getId(), 0, 2)).thenReturn(List.of(item));
         when(bookingService.getLastBookingByItem(any())).thenReturn(null);
         when(bookingService.getNextBookingByItem(any())).thenReturn(null);
 
-        ItemResponseDto itemResponseDto1 = makeItemResponseDto(1L, "item1", "description1", true, null, null, null, Collections.emptyList());
-        ItemResponseDto itemResponseDto2 = makeItemResponseDto(2L, "item2", "description2", false, null, null, null, Collections.emptyList());
         mockMvc.perform(get("/items")
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 1L)
+                        .header(USER_ID_HEADER, user.getId())
                         .param("from", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(List.of(itemResponseDto1, itemResponseDto2))));
+                .andExpect(content().json(gson.toJson(List.of(itemResponseDto))));
 
-        verify(itemService).getAllByUserId(1L, 0, 2);
-        verify(bookingService, times(2)).getLastBookingByItem(any());
-        verify(bookingService, times(2)).getNextBookingByItem(any());
+        verify(itemService).getAllByUserId(user.getId(), 0, 2);
+        verify(bookingService).getLastBookingByItem(any());
+        verify(bookingService).getNextBookingByItem(any());
         verifyNoMoreInteractions(itemService);
         verifyNoMoreInteractions(bookingService);
     }
@@ -244,7 +247,7 @@ class ItemControllerTest {
     public void checkSearch_emptyList() throws Exception {
         mockMvc.perform(get("/items/search")
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 2L)
+                        .header(USER_ID_HEADER, user.getId())
                         .param("text", "")
                         .param("from", "0")
                         .param("size", "2"))
@@ -257,22 +260,17 @@ class ItemControllerTest {
 
     @Test
     public void checkSearch() throws Exception {
-        User user = makeUser(1L, "Igor", "igor@ya.ru");
-        Item item1 = makeItem(1L, "item1", "description1", true, user, Collections.emptyList(), null);
-        Item item2 = makeItem(2L, "item2", "description2", false, user, Collections.emptyList(), null);
         String template = "item";
-        when(itemService.getAllByTemplate(template, 0, 2)).thenReturn(List.of(item1, item2));
+        when(itemService.getAllByTemplate(template, 0, 2)).thenReturn(List.of(item));
 
-        ItemDto itemDtoBeforeSave = makeItemDto(1L, "item1", "description1", true, null);
-        ItemDto itemDtoAfterSave = makeItemDto(2L, "item2", "description2", false, null);
         mockMvc.perform(get("/items/search")
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 1L)
+                        .header(USER_ID_HEADER, user.getId())
                         .param("text", template)
                         .param("from", "0")
                         .param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(List.of(itemDtoBeforeSave, itemDtoAfterSave))));
+                .andExpect(content().json(gson.toJson(List.of(itemDto))));
 
         verify(itemService).getAllByTemplate(template, 0, 2);
         verifyNoMoreInteractions(itemService);
@@ -280,26 +278,25 @@ class ItemControllerTest {
 
     @Test
     public void checkSaveComment() throws Exception {
-        User user = makeUser(1L, "Igor", "igor@ya.ru");
-        Item item = makeItem(1L, "item1", "description1", true, user, Collections.emptyList(), null);
         Comment commentBeforeSave = makeComment(null, "comment", item, user, LocalDate.now());
         Comment commentAfterSave = makeComment(1L, "comment", item, user, LocalDate.now());
-        when(userService.getUser(1L)).thenReturn(user);
-        when(itemService.getItem(1L)).thenReturn(item);
+        when(userService.getUser(user.getId())).thenReturn(user);
+        when(itemService.getItem(item.getId())).thenReturn(item);
         when(itemService.saveComment(commentBeforeSave)).thenReturn(commentAfterSave);
 
-        CommentResponseDto commentResponseDto = makeCommentResponseDto(1L, "comment", "item1", "Igor", LocalDate.now());
+        CommentResponseDto commentResponseDto = makeCommentResponseDto(1L, "comment",
+                "item1", "Igor", LocalDate.now());
 
         mockMvc.perform(post("/items/{itemId}/comment", 1L)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, 1L)
+                        .header(USER_ID_HEADER, user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(gson.toJson(new CommentCreateDto("comment"))))
                 .andExpect(status().isOk())
                 .andExpect(content().json(gson.toJson(commentResponseDto)));
 
-        verify(userService).getUser(1L);
-        verify(itemService).getItem(1L);
+        verify(userService).getUser(user.getId());
+        verify(itemService).getItem(item.getId());
         verify(itemService).saveComment(commentBeforeSave);
         verifyNoMoreInteractions(userService);
         verifyNoMoreInteractions(itemService);

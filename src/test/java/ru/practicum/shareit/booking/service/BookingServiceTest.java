@@ -32,32 +32,40 @@ class BookingServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    private User booker;
+    private Item item;
+    private Booking bookingWithoutId;
+    private Booking booking;
+
     @BeforeEach
     void setUp() {
         bookingService = new BookingServiceImpl(bookingRepository, userRepository);
+        booker = makeUser(1L, "Maria", "maria@ya.ru");
+        User owner = makeUser(2L, "Oleg", "oleg@ya.ru");
+        item = makeItem(1L, "item", "description", true, owner, null, null);
+        bookingWithoutId = makeBooking(null, LocalDateTime.of(2022, 10, 10, 10, 10, 10),
+                LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
+        booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10),
+                LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
     }
 
     @Test
     public void checkSaveBooking() {
-        User booker = makeUser(1L, "Maria", "maria@ya.ru");
-        Item item = makeItem(1L, "item", "description", true, null, null, null);
-        Booking bookingBeforeSave = makeBooking(null, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
-        Booking bookingAfterSave = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
-        when(bookingRepository.save(bookingBeforeSave)).thenReturn(bookingAfterSave);
+        when(bookingRepository.save(bookingWithoutId)).thenReturn(booking);
 
-        Booking savedBooking = bookingService.saveBooking(bookingBeforeSave);
-        assertEquals(bookingAfterSave, savedBooking);
+        Booking savedBooking = bookingService.saveBooking(bookingWithoutId);
+        assertEquals(booking, savedBooking);
 
-        verify(bookingRepository).save(bookingBeforeSave);
+        verify(bookingRepository).save(bookingWithoutId);
         verifyNoMoreInteractions(bookingRepository);
     }
 
     @Test
     public void checkSaveBooking_unavailableItemException() {
-        Item item = makeItem(1L, "item", "description", false, null, null, null);
-        Booking bookingBeforeSave = makeBooking(null, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, null);
+        item.setAvailable(false);
 
-        final var thrown = assertThrows(UnavailableItemException.class, () -> bookingService.saveBooking(bookingBeforeSave));
+        final var thrown = assertThrows(UnavailableItemException.class,
+                () -> bookingService.saveBooking(bookingWithoutId));
         assertEquals("Item " + 1L + " is unavailable now", thrown.getMessage());
 
         verifyNoInteractions(bookingRepository);
@@ -65,30 +73,28 @@ class BookingServiceTest {
 
     @Test
     public void checkApproveBooking() {
-        User booker = makeUser(1L, "Maria", "maria@ya.ru");
-        Item item = makeItem(1L, "item", "description", true, booker, null, null);
-        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
-        Booking bookingAfterApprove = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.APPROVED, item, booker);
-        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
-        when(bookingRepository.save(bookingAfterApprove)).thenReturn(bookingAfterApprove);
+        item.setOwner(booker);
+        bookingWithoutId.setId(1L);
+        booking.setStatus(BookingStatus.APPROVED);
+        when(bookingRepository.findById(bookingWithoutId.getId()))
+                .thenReturn(Optional.of(bookingWithoutId));
+        when(bookingRepository.save(booking)).thenReturn(booking);
 
-        Booking bookingFromDb = bookingService.approveBooking(booking.getId(), true, booker.getId());
-        assertEquals(bookingAfterApprove, bookingFromDb);
+        Booking bookingFromDb = bookingService.approveBooking(bookingWithoutId.getId(), true, booker.getId());
+        assertEquals(booking, bookingFromDb);
 
-        verify(bookingRepository).findById(booking.getId());
-        verify(bookingRepository).save(bookingAfterApprove);
+        verify(bookingRepository).findById(bookingWithoutId.getId());
+        verify(bookingRepository).save(booking);
         verifyNoMoreInteractions(bookingRepository);
     }
 
     @Test
     public void checkApproveBooking_accessException() {
-        User booker = makeUser(1L, "Maria", "maria@ya.ru");
-        User owner = makeUser(2L, "Oleg", "oleg@ya.ru");
-        Item item = makeItem(1L, "item", "description", true, owner, null, null);
-        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
-        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.findById(booking.getId()))
+                .thenReturn(Optional.of(booking));
 
-        final var thrown = assertThrows(ItemNotFoundException.class, () -> bookingService.approveBooking(booking.getId(), true, booker.getId()));
+        final var thrown = assertThrows(ItemNotFoundException.class,
+                () -> bookingService.approveBooking(booking.getId(), true, booker.getId()));
         assertEquals("Item " + booking.getItem().getId() +
                 " from booking " + booking.getId() + " doesn't belong you", thrown.getMessage());
 
@@ -98,12 +104,13 @@ class BookingServiceTest {
 
     @Test
     public void checkApproveBooking_alreadyApprovedException() {
-        User booker = makeUser(1L, "Maria", "maria@ya.ru");
-        Item item = makeItem(1L, "item", "description", true, booker, null, null);
-        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.APPROVED, item, booker);
-        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        item.setOwner(booker);
+        booking.setStatus(BookingStatus.APPROVED);
+        when(bookingRepository.findById(booking.getId()))
+                .thenReturn(Optional.of(booking));
 
-        final var thrown = assertThrows(BookingValidationException.class, () -> bookingService.approveBooking(booking.getId(), true, booker.getId()));
+        final var thrown = assertThrows(BookingValidationException.class,
+                () -> bookingService.approveBooking(booking.getId(), true, booker.getId()));
         assertEquals("Booking " + booking.getId() +
                 " is already " + BookingStatus.APPROVED, thrown.getMessage());
 
@@ -113,10 +120,8 @@ class BookingServiceTest {
 
     @Test
     public void checkGetBookingById() {
-        User booker = makeUser(1L, "Maria", "maria@ya.ru");
-        Item item = makeItem(1L, "item", "description", true, null, null, null);
-        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
-        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.findById(booking.getId()))
+                .thenReturn(Optional.of(booking));
 
         Booking bookingFromDb = bookingService.getBookingById(booking.getId(), booker.getId());
         assertEquals(booking, bookingFromDb);
@@ -128,13 +133,11 @@ class BookingServiceTest {
     @Test
     public void checkGetBookingById_noAccessException() {
         Long alienId = 3L;
-        User booker = makeUser(1L, "Maria", "maria@ya.ru");
-        User owner = makeUser(2L, "Anna", "anna@ya.ru");
-        Item item = makeItem(1L, "item", "description", true, owner, null, null);
-        Booking booking = makeBooking(1L, LocalDateTime.of(2022, 10, 10, 10, 10, 10), LocalDateTime.of(2022, 10, 11, 10, 10, 10), BookingStatus.WAITING, item, booker);
-        when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
+        when(bookingRepository.findById(booking.getId()))
+                .thenReturn(Optional.of(booking));
 
-        final var thrown = assertThrows(BookingNotFoundException.class, () -> bookingService.getBookingById(booking.getId(), alienId));
+        final var thrown = assertThrows(BookingNotFoundException.class,
+                () -> bookingService.getBookingById(booking.getId(), alienId));
         assertEquals("No access to booking " + booking.getId(), thrown.getMessage());
 
         verify(bookingRepository).findById(booking.getId());
@@ -145,7 +148,8 @@ class BookingServiceTest {
     public void checkGetBookingById_notFoundException() {
         when(bookingRepository.findById(any())).thenReturn(Optional.empty());
 
-        final var thrown = assertThrows(BookingNotFoundException.class, () -> bookingService.getBookingById(1L, 1L));
+        final var thrown = assertThrows(BookingNotFoundException.class,
+                () -> bookingService.getBookingById(1L, 1L));
         assertEquals("Booking " + 1L + " not found", thrown.getMessage());
 
         verify(bookingRepository).findById(any());

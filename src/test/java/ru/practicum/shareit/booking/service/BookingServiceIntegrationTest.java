@@ -153,7 +153,8 @@ public class BookingServiceIntegrationTest {
     @Test
     public void checkGetLastBookingByItem() {
         User user = makeUser(3L, "Maria", "maria@ya.ru");
-        Item item = makeItem(4L, "Дрель", "На аккумуляторе", true, user, null, null);
+        Item item = makeItem(4L, "Дрель", "На аккумуляторе",
+                true, user, null, null);
         Booking booking = bookingService.getLastBookingByItem(item);
 
         assertThat(booking, notNullValue());
@@ -163,7 +164,8 @@ public class BookingServiceIntegrationTest {
     @Test
     public void checkGetNextBookingByItem() {
         User user = makeUser(2L, "Anna", "anna@ya.ru");
-        Item item = makeItem(3L, "Велик", "Старый велосипед, требуется замена цепи", true, user, null, null);
+        Item item = makeItem(3L, "Велик", "Старый велосипед, требуется замена цепи",
+                true, user, null, null);
         Booking booking = bookingService.getNextBookingByItem(item);
 
         assertThat(booking, notNullValue());

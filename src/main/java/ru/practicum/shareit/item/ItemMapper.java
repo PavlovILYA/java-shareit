@@ -11,6 +11,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class ItemMapper {
@@ -32,6 +33,7 @@ public class ItemMapper {
                 .available(itemDto.getAvailable())
                 .owner(owner)
                 .itemRequest(itemRequest)
+                .comments(Collections.emptyList())
                 .build();
     }
 

@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.RequestService;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -38,26 +40,36 @@ class ItemRequestControllerTest {
     @MockBean
     private UserService userService;
 
+    private User requester;
+    private ItemRequest request;
+    ItemRequestResponseDto requestResponseDto;
+
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
 
+    @BeforeEach
+    void setUp() {
+        requester = makeUser(1L, "Denis", "denis@ya.ru");
+        request = makeItemRequest(1L, "description",
+                LocalDateTime.of(2022, 10, 10, 10, 10, 10),requester, null);
+        requestResponseDto = makeItemRequestResponseDto(1L, "description",
+                LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
+    }
+
     @Test
     public void checkSaveRequest() throws Exception {
-        User requester = makeUser(1L, "Denis", "denis@ya.ru");
-        ItemRequest itemRequestAfterSave = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
         when(userService.getUser(requester.getId())).thenReturn(requester);
-        when(requestService.saveRequest(any())).thenReturn(itemRequestAfterSave);
+        when(requestService.saveRequest(any())).thenReturn(request);
 
-        ItemRequestResponseDto itemRequestResponseDto = makeItemRequestResponseDto(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
         mockMvc.perform(post("/requests")
                         .content(gson.toJson(new ItemRequestCreateDto("description")))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, requester.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(itemRequestResponseDto)));
+                .andExpect(content().json(gson.toJson(requestResponseDto)));
 
         verify(userService).getUser(requester.getId());
         verify(requestService).saveRequest(any());
@@ -67,17 +79,14 @@ class ItemRequestControllerTest {
 
     @Test
     public void checkGetMyRequests() throws Exception {
-        User requester = makeUser(1L, "Denis", "denis@ya.ru");
-        ItemRequest itemRequest = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
         when(userService.getUser(requester.getId())).thenReturn(requester);
-        when(requestService.getAllByRequester(requester)).thenReturn(List.of(itemRequest));
+        when(requestService.getAllByRequester(requester)).thenReturn(List.of(request));
 
-        ItemRequestResponseDto itemRequestResponseDto = makeItemRequestResponseDto(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
         mockMvc.perform(get("/requests")
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, requester.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(List.of(itemRequestResponseDto))));
+                .andExpect(content().json(gson.toJson(List.of(requestResponseDto))));
 
         verify(userService).getUser(requester.getId());
         verify(requestService).getAllByRequester(requester);
@@ -87,18 +96,17 @@ class ItemRequestControllerTest {
 
     @Test
     public void checkGetAlienRequests() throws Exception {
-        User requester = makeUser(1L, "Denis", "denis@ya.ru");
-        User otherUser = makeUser(1L, "Denis", "denis@ya.ru");
-        ItemRequest itemRequest = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), otherUser, null);
+        User otherUser = makeUser(2L, "Anna", "anna@ya.ru");
+        request.setRequester(otherUser);
         when(userService.getUser(requester.getId())).thenReturn(requester);
-        when(requestService.getAllAlien(requester, 0, 5)).thenReturn(List.of(itemRequest));
+        when(requestService.getAllAlien(requester, 0, 5)).thenReturn(List.of(request));
 
-        ItemRequestResponseDto itemRequestResponseDto = makeItemRequestResponseDto(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), otherUser, null);
+        requestResponseDto.setRequester(new UserDto(otherUser.getId(), otherUser.getName(), otherUser.getEmail()));
         mockMvc.perform(get("/requests/all")
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, requester.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(List.of(itemRequestResponseDto))));
+                .andExpect(content().json(gson.toJson(List.of(requestResponseDto))));
 
         verify(userService).getUser(requester.getId());
         verify(requestService).getAllAlien(requester, 0, 5);
@@ -108,17 +116,14 @@ class ItemRequestControllerTest {
 
     @Test
     public void checkGetRequestById() throws Exception {
-        User requester = makeUser(1L, "Denis", "denis@ya.ru");
-        ItemRequest itemRequest = makeItemRequest(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
         when(userService.getUser(requester.getId())).thenReturn(requester);
-        when(requestService.getRequestById(requester.getId())).thenReturn(itemRequest);
+        when(requestService.getRequestById(requester.getId())).thenReturn(request);
 
-        ItemRequestResponseDto itemRequestResponseDto = makeItemRequestResponseDto(1L, "description", LocalDateTime.of(2022, 10, 10, 10, 10, 10), requester, null);
         mockMvc.perform(get("/requests/{requestId}", 1L)
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID_HEADER, requester.getId()))
                 .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(itemRequestResponseDto)));
+                .andExpect(content().json(gson.toJson(requestResponseDto)));
 
         verify(userService).getUser(requester.getId());
         verify(requestService).getRequestById(requester.getId());

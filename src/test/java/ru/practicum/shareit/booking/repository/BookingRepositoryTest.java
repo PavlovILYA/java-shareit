@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -28,9 +29,20 @@ class BookingRepositoryTest {
 
     private final PageRequest pr = PageRequest.of(0, 5);
 
+    private User booker;
+    private User owner;
+    private Item item;
+
+    @BeforeEach
+    void setUp() {
+        booker = makeUser(1L, "Petr", "petr@ya.ru");
+        owner = makeUser(3L, "Maria", "maria@ya.ru");
+        item = makeItem(6L, "Мультиварка", "В хорошем состоянии",
+                true, null, null, null);
+    }
+
     @Test
     public void checkFindAllFutureByBooker() {
-        User booker = makeUser(1L, "Petr", "petr@ya.ru");
         List<Booking> bookings = bookingRepository.findAllFutureByBooker(booker, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -41,7 +53,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllPastByBooker() {
-        User booker = makeUser(1L, "Petr", "petr@ya.ru");
         List<Booking> bookings = bookingRepository.findAllPastByBooker(booker, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -52,7 +63,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllCurrentByBooker() {
-        User booker = makeUser(1L, "Petr", "petr@ya.ru");
         List<Booking> bookings = bookingRepository.findAllPastByBooker(booker, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -63,7 +73,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllFutureByOwner() {
-        User owner = makeUser(3L, "Maria", "maria@ya.ru");
         List<Booking> bookings = bookingRepository.findAllFutureByOwner(owner, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -73,7 +82,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllPastByOwner() {
-        User owner = makeUser(3L, "Maria", "maria@ya.ru");
         List<Booking> bookings = bookingRepository.findAllPastByOwner(owner, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -84,7 +92,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllCurrentByOwner() {
-        User owner = makeUser(3L, "Maria", "maria@ya.ru");
         List<Booking> bookings = bookingRepository.findAllCurrentByOwner(owner, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -95,7 +102,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllPastOrCurrentByItemDesc() {
-        Item item = makeItem(6L, "Мультиварка", "В хорошем состоянии", true, null, null, null);
         List<Booking> bookings = bookingRepository.findAllPastOrCurrentByItemDesc(item, pr).getContent();
 
         assertThat(bookings, notNullValue());
@@ -105,7 +111,6 @@ class BookingRepositoryTest {
 
     @Test
     public void checkFindAllFutureByItemAsc() {
-        Item item = makeItem(6L, "Мультиварка", "В хорошем состоянии", true, null, null, null);
         List<Booking> bookings = bookingRepository.findAllFutureByItemAsc(item, pr).getContent();
 
         assertThat(bookings, notNullValue());
