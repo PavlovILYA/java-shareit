@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemRequestController {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    private static final String FROM_DEFAULT = "0";
+    private static final String SIZE_DEFAULT = "5";
 
     private final RequestService requestService;
     private final UserService userService;
@@ -46,9 +48,11 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestResponseDto> getAlienRequests(@RequestHeader(USER_ID_HEADER) Long userId,
                                                          @PositiveOrZero
-                                                         @RequestParam(name = "from", defaultValue = "0") int from,
+                                                         @RequestParam(name = "from", defaultValue = FROM_DEFAULT)
+                                                         int from,
                                                          @Positive
-                                                         @RequestParam(name = "size", defaultValue = "5") int size) {
+                                                         @RequestParam(name = "size", defaultValue = SIZE_DEFAULT)
+                                                         int size) {
         User requester = userService.getUser(userId);
         return requestService.getAllAlien(requester, from, size).stream()
                 .map(RequestMapper::toRequestDto)
