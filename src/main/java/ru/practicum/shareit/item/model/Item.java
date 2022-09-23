@@ -35,4 +35,16 @@ public class Item {
     @JoinColumn(table = "items", name = "request_id", updatable = false)
     @JsonIgnore
     private ItemRequest itemRequest;
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", available=" + available +
+                ", ownerId=" + (owner == null ? null : owner.getId()) +
+                ", itemRequestId=" + (itemRequest == null ? null : itemRequest.getId()) +
+                '}';
+    }
 }

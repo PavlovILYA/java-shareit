@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -25,7 +27,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item saveItem(Item item) {
-        return itemRepository.save(item);
+        item = itemRepository.save(item);
+        log.debug("Saved item: {}", item);
+        return item;
     }
 
     @Override
@@ -41,27 +45,35 @@ public class ItemServiceImpl implements ItemService {
                     + item.getOwner());
         }
         updateFields(item, storedItem);
-        return itemRepository.save(storedItem);
+        storedItem = itemRepository.save(storedItem);
+        log.debug("Updated item: {}", storedItem);
+        return storedItem;
     }
 
     @Override
     public Item getItem(Long itemId) {
-        return itemRepository.findById(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> {
                     throw new ItemNotFoundException(itemId);
                 });
+        log.debug("Returned item: {}", item);
+        return item;
     }
 
     @Override
     public List<Item> getAllByUserId(Long userId, int from, int size) {
         Pageable pageRequest = PageRequest.of(from / size, size);
-        return itemRepository.getAllByOwnerIdOrderById(userId, pageRequest).getContent();
+        List<Item> items = itemRepository.getAllByOwnerIdOrderById(userId, pageRequest).getContent();
+        log.debug("Items by userId={}: {}", userId, items);
+        return items;
     }
 
     @Override
     public List<Item> getAllByTemplate(String template, int from, int size) {
         Pageable pageRequest = PageRequest.of(from / size, size);
-        return itemRepository.getAllByTemplate(template, pageRequest).getContent();
+        List<Item> items = itemRepository.getAllByTemplate(template, pageRequest).getContent();
+        log.debug("Items by template={}: {}", template, items);
+        return items;
     }
 
     @Override
@@ -72,7 +84,9 @@ public class ItemServiceImpl implements ItemService {
         if (!doesAuthorRentThisItem) {
             throw new UnavailableItemException(comment.getItem().getId());
         }
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+        log.debug("Saved comment: {}", savedComment);
+        return savedComment;
     }
 
     private void updateFields(Item item, Item storedItem) {

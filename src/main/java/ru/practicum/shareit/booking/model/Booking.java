@@ -32,4 +32,16 @@ public class Booking {
     private User booker;
     @Enumerated(value = EnumType.STRING)
     private BookingStatus status;
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id=" + id +
+                ", start=" + start +
+                ", end=" + end +
+                ", itemId=" + (item == null ? null : item.getId()) +
+                ", bookerId=" + (booker == null ? null : booker.getId()) +
+                ", status=" + status +
+                '}';
+    }
 }

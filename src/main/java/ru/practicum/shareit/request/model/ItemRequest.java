@@ -28,4 +28,14 @@ public class ItemRequest {
     private User requester;
     @OneToMany(mappedBy = "itemRequest")
     private List<Item> items;
+
+    @Override
+    public String toString() {
+        return "ItemRequest{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", created=" + created +
+                ", requesterId=" + (requester == null ? null : requester.getId()) +
+                '}';
+    }
 }

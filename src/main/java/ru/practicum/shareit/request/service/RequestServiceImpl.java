@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
@@ -18,24 +20,32 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ItemRequest saveRequest(ItemRequest itemRequest) {
-        return requestRepository.save(itemRequest);
+        itemRequest = requestRepository.save(itemRequest);
+        log.debug("Saved request: {}", itemRequest);
+        return itemRequest;
     }
 
     @Override
     public List<ItemRequest> getAllByRequester(User requester) {
-        return requestRepository.findAllByRequesterOrderByCreatedDesc(requester);
+        List<ItemRequest> requests = requestRepository.findAllByRequesterOrderByCreatedDesc(requester);
+        log.debug("Requests by userId={}: {}", requester.getId(), requests);
+        return requests;
     }
 
     @Override
     public List<ItemRequest> getAllAlien(User requester, int from, int size) {
         Pageable pageRequest = PageRequest.of(from / size, size);
-        return requestRepository.findAllAlien(requester.getId(), pageRequest).getContent();
+        List<ItemRequest> requests = requestRepository.findAllAlien(requester.getId(), pageRequest).getContent();
+        log.debug("Requests for userId={}: {}", requester.getId(), requests);
+        return requests;
     }
 
     @Override
     public ItemRequest getRequestById(Long requestId) {
-        return requestRepository.findById(requestId).orElseThrow(() -> {
+        ItemRequest request = requestRepository.findById(requestId).orElseThrow(() -> {
             throw new RequestNotFoundException(requestId);
         });
+        log.debug("Returned request: {}", request);
+        return request;
     }
 }
