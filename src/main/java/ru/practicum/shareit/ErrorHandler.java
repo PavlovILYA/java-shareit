@@ -1,6 +1,7 @@
 package ru.practicum.shareit;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -19,8 +20,8 @@ import ru.practicum.shareit.user.exception.UserNotFoundException;
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 
-@RestControllerAdvice
 @Slf4j
+@RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class,
                        CustomValidationException.class,
@@ -50,5 +51,12 @@ public class ErrorHandler {
     public ErrorResponse handle403Exception(final InvalidOwnerException e) {
         log.error("Response HTTP {} {}", HttpStatus.FORBIDDEN.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), e.getMessage());
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handle409Exception(final Exception e) {
+        log.error("Response HTTP {} {}", HttpStatus.CONFLICT.value(), e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), e.getMessage());
     }
 }
