@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.CreateValidationGroup;
@@ -27,11 +28,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.item.controller.ItemController.ROOT_PATH;
+
+@Slf4j
 @Validated
 @RestController
-@RequestMapping("/items")
+@RequestMapping(ROOT_PATH)
 @RequiredArgsConstructor
 public class ItemController {
+    public static final String ROOT_PATH = "/items";
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private static final String FROM_DEFAULT = "0";
     private static final String SIZE_DEFAULT = "5";
@@ -44,6 +49,7 @@ public class ItemController {
     @PostMapping
     public ItemDto saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
                             @Validated({CreateValidationGroup.class}) @RequestBody ItemDto itemDto) {
+        log.debug("POST {} userId={} body: {}", ROOT_PATH, userId, itemDto);
         User owner = userService.getUser(userId);
         ItemRequest itemRequest = itemDto.getRequestId() == null
                 ? null
@@ -56,6 +62,7 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader(USER_ID_HEADER) Long userId,
                               @PathVariable("itemId") Long itemId,
                               @Validated({UpdateValidationGroup.class}) @RequestBody ItemDto itemDto) {
+        log.debug("PATCH {}/{} userId={} body: {}", ROOT_PATH, itemId, userId, itemDto);
         validate(itemDto);
         itemDto.setId(itemId);
         User owner = userService.getUser(userId);
@@ -66,6 +73,7 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemResponseDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                    @PathVariable("itemId") Long itemId) {
+        log.debug("GET {}/{} userId={}", ROOT_PATH, itemId, userId);
         Item item = itemService.getItem(itemId);
         return ItemMapper.toItemResponseDto(item,
                 item.getOwner().getId().equals(userId) ? bookingService.getLastBookingByItem(item) : null,
@@ -78,6 +86,7 @@ public class ItemController {
                                             @RequestParam(name = "from", defaultValue = FROM_DEFAULT) int from,
                                             @Positive
                                             @RequestParam(name = "size", defaultValue = SIZE_DEFAULT) int size) {
+        log.debug("GET {} userId={} from={} size={}", ROOT_PATH, userId, from, size);
         return itemService.getAllByUserId(userId, from, size).stream()
                 .map(item -> ItemMapper.toItemResponseDto(item,
                         bookingService.getLastBookingByItem(item),
@@ -92,6 +101,7 @@ public class ItemController {
                                 @RequestParam(name = "from", defaultValue = FROM_DEFAULT) int from,
                                 @Positive
                                 @RequestParam(name = "size", defaultValue = SIZE_DEFAULT) int size) {
+        log.debug("GET {}/search userId={} from={} size={} text={}", ROOT_PATH, userId, from, size, text);
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
@@ -104,6 +114,7 @@ public class ItemController {
     public CommentResponseDto saveComment(@PathVariable("itemId") Long itemId,
                                           @Valid @RequestBody CommentCreateDto commentCreateDto,
                                           @RequestHeader(USER_ID_HEADER) Long userId) {
+        log.debug("POST {}/{}/comment userId={} body: {}", ROOT_PATH, itemId, userId, commentCreateDto);
         User author = userService.getUser(userId);
         Item item = itemService.getItem(itemId);
         Comment comment = ItemMapper.toComment(commentCreateDto, author, item);

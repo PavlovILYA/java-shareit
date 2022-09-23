@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.RequestMapper;
@@ -17,11 +18,15 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.request.controller.ItemRequestController.ROOT_PATH;
+
+@Slf4j
 @Validated
 @RestController
-@RequestMapping(path = "/requests")
+@RequestMapping(path = ROOT_PATH)
 @RequiredArgsConstructor
 public class ItemRequestController {
+    public static final String ROOT_PATH = "/requests";
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private static final String FROM_DEFAULT = "0";
     private static final String SIZE_DEFAULT = "5";
@@ -32,6 +37,7 @@ public class ItemRequestController {
     @PostMapping
     public ItemRequestResponseDto saveRequest(@RequestHeader(USER_ID_HEADER) Long userId,
                                               @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
+        log.debug("POST {} userId={} body: {}", ROOT_PATH, userId, itemRequestCreateDto);
         User register = userService.getUser(userId);
         ItemRequest itemRequest = RequestMapper.toRequest(itemRequestCreateDto, register);
         return RequestMapper.toRequestDto(requestService.saveRequest(itemRequest));
@@ -39,6 +45,7 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestResponseDto> getMyRequests(@RequestHeader(USER_ID_HEADER) Long userId) {
+        log.debug("GET {} userId={}", ROOT_PATH, userId);
         User requester = userService.getUser(userId);
         return requestService.getAllByRequester(requester).stream()
                 .map(RequestMapper::toRequestDto)
@@ -53,6 +60,7 @@ public class ItemRequestController {
                                                          @Positive
                                                          @RequestParam(name = "size", defaultValue = SIZE_DEFAULT)
                                                          int size) {
+        log.debug("GET {}/all userId={} from={} size={}", ROOT_PATH, userId, from, size);
         User requester = userService.getUser(userId);
         return requestService.getAllAlien(requester, from, size).stream()
                 .map(RequestMapper::toRequestDto)
@@ -62,6 +70,7 @@ public class ItemRequestController {
     @GetMapping("/{requestId}")
     public ItemRequestResponseDto getRequestById(@RequestHeader(USER_ID_HEADER) Long userId,
                                                  @PathVariable("requestId") Long requestId) {
+        log.debug("GET {}/{} userId={}", ROOT_PATH, requestId, userId);
         userService.getUser(userId);
         return RequestMapper.toRequestDto(requestService.getRequestById(requestId));
     }
