@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
@@ -17,8 +20,8 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
@@ -30,7 +33,9 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getItem().getAvailable().equals(Boolean.TRUE)) {
             throw new UnavailableItemException(booking.getItem().getId());
         }
-        return bookingRepository.save(booking);
+        booking = bookingRepository.save(booking);
+        log.debug("Saved booking: {}", booking);
+        return booking;
     }
 
     @Override
@@ -41,7 +46,9 @@ public class BookingServiceImpl implements BookingService {
         BookingStatus newStatus = BookingStatus.approve(isApproved);
         checkBookingBeforeApprove(booking, newStatus, ownerId);
         booking.setStatus(newStatus);
-        return bookingRepository.save(booking);
+        booking = bookingRepository.save(booking);
+        log.debug("Approved booking: {}", booking);
+        return booking;
     }
 
     @Override
@@ -50,65 +57,94 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingNotFoundException(bookingId);
         });
         checkAccess(booking, userId);
+        log.debug("Returned booking: {}", booking);
         return booking;
     }
 
     @Override
-    public List<Booking> getBookingRequestsByUserId(Long userId, BookingState state) {
+    public List<Booking> getBookingRequestsByUserId(Long userId, BookingState state, int from, int size) {
         User booker = userRepository.findById(userId).orElseThrow(() -> {
             throw new UserNotFoundException(userId);
         });
+        Pageable pageRequest = PageRequest.of(from / size, size);
+        List<Booking> bookings;
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByBookerOrderByStartDesc(booker);
+                bookings = bookingRepository.findAllByBookerOrderByStartDesc(booker, pageRequest).getContent();
+                break;
             case CURRENT:
-                return bookingRepository.findAllCurrentByBooker(booker);
+                bookings = bookingRepository.findAllCurrentByBooker(booker, pageRequest).getContent();
+                break;
             case PAST:
-                return bookingRepository.findAllPastByBooker(booker);
+                bookings = bookingRepository.findAllPastByBooker(booker, pageRequest).getContent();
+                break;
             case FUTURE:
-                return bookingRepository.findAllFutureByBooker(booker);
+                bookings = bookingRepository.findAllFutureByBooker(booker, pageRequest).getContent();
+                break;
             case WAITING:
-                return bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.WAITING);
+                bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker,
+                                BookingStatus.WAITING, pageRequest).getContent();
+                break;
             case REJECTED:
-                return bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker, BookingStatus.REJECTED);
+                bookings = bookingRepository.findAllByBookerAndStatusOrderByStartDesc(booker,
+                                BookingStatus.REJECTED, pageRequest).getContent();
+                break;
             default:
                 throw new InvalidBookingStatusException();
         }
+        log.debug("{} bookings by bookerId={}: {}", state, userId, bookings);
+        return bookings;
     }
 
     @Override
-    public List<Booking> getBookingsByOwnerId(Long ownerId, BookingState state) {
+    public List<Booking> getBookingsByOwnerId(Long ownerId, BookingState state, int from, int size) {
         User owner = userRepository.findById(ownerId).orElseThrow(() -> {
             throw new UserNotFoundException(ownerId);
         });
+        Pageable pageRequest = PageRequest.of(from / size, size);
+        List<Booking> bookings;
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByItemOwnerOrderByStartDesc(owner);
+                bookings = bookingRepository.findAllByItemOwnerOrderByStartDesc(owner, pageRequest).getContent();
+                break;
             case CURRENT:
-                return bookingRepository.findAllCurrentByOwner(owner);
+                bookings = bookingRepository.findAllCurrentByOwner(owner, pageRequest).getContent();
+                break;
             case PAST:
-                return bookingRepository.findAllPastByOwner(owner);
+                bookings = bookingRepository.findAllPastByOwner(owner, pageRequest).getContent();
+                break;
             case FUTURE:
-                return bookingRepository.findAllFutureByOwner(owner);
+                bookings = bookingRepository.findAllFutureByOwner(owner, pageRequest).getContent();
+                break;
             case WAITING:
-                return bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner, BookingStatus.WAITING);
+                bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner,
+                        BookingStatus.WAITING, pageRequest).getContent();
+                break;
             case REJECTED:
-                return bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner, BookingStatus.REJECTED);
+                bookings = bookingRepository.findAllByItemOwnerAndStatusOrderByStartDesc(owner,
+                        BookingStatus.REJECTED, pageRequest).getContent();
+                break;
             default:
                 throw new InvalidBookingStatusException();
         }
+        log.debug("{} bookings by ownerId={}: {}", state, ownerId, bookings);
+        return bookings;
     }
 
     @Override
-    public Optional<Booking> getLastBookingByItem(Item item) {
-        return bookingRepository.findAllPastOrCurrentByItemDesc(item).stream()
-                .findFirst();
+    public Booking getLastBookingByItem(Item item) {
+        Booking booking = bookingRepository.findAllPastOrCurrentByItemDesc(item, PageRequest.of(0, 1)).stream()
+                .findFirst().orElse(null);
+        log.debug("Last booking by itemId={}: {}", item.getId(), booking);
+        return booking;
     }
 
     @Override
-    public Optional<Booking> getNextBookingByItem(Item item) {
-        return bookingRepository.findAllFutureByItemAsc(item).stream()
-                .findFirst();
+    public Booking getNextBookingByItem(Item item) {
+        Booking booking = bookingRepository.findAllFutureByItemAsc(item, PageRequest.of(0, 1)).stream()
+                .findFirst().orElse(null);
+        log.debug("Next booking by itemId={}: {}", item.getId(), booking);
+        return booking;
     }
 
     private void checkBookingBeforeApprove(Booking booking, BookingStatus newStatus, Long ownerId) {

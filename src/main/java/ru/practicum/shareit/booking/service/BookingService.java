@@ -5,7 +5,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface BookingService {
     Booking saveBooking(Booking booking);
@@ -14,11 +13,11 @@ public interface BookingService {
 
     Booking getBookingById(Long bookingId, Long userId);
 
-    List<Booking> getBookingRequestsByUserId(Long userId, BookingState state);
+    List<Booking> getBookingRequestsByUserId(Long userId, BookingState state, int from, int size);
 
-    List<Booking> getBookingsByOwnerId(Long ownerId, BookingState state);
+    List<Booking> getBookingsByOwnerId(Long ownerId, BookingState state, int from, int size);
 
-    Optional<Booking> getLastBookingByItem(Item item);
+    Booking getLastBookingByItem(Item item);
 
-    Optional<Booking> getNextBookingByItem(Item item);
+    Booking getNextBookingByItem(Item item);
 }

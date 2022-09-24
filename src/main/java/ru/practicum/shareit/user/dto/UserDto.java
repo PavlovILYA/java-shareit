@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.CreateValidationGroup;
 import ru.practicum.shareit.UpdateValidationGroup;
 
@@ -10,7 +12,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder(toBuilder = true)
 public class UserDto {
     private Long id;
     @NotNull(groups = {CreateValidationGroup.class})
