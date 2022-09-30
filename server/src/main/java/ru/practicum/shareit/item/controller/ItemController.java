@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.CreateValidationGroup;
-import ru.practicum.shareit.CustomValidationException;
 import ru.practicum.shareit.UpdateValidationGroup;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.ItemMapper;
@@ -123,10 +122,10 @@ public class ItemController {
 
     private void validate(ItemDto itemDto) {
         if (itemDto.getName() != null && itemDto.getName().isBlank()) {
-            throw new CustomValidationException("Invalid field 'name' for ItemDto");
+            //throw new CustomValidationException("Invalid field 'name' for ItemDto");
         }
         if (itemDto.getDescription() != null && itemDto.getDescription().isBlank()) {
-            throw new CustomValidationException("Invalid field 'description' for ItemDto");
+            //throw new CustomValidationException("Invalid field 'description' for ItemDto");
         }
     }
 }

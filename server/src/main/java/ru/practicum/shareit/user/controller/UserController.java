@@ -2,15 +2,11 @@ package ru.practicum.shareit.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.CreateValidationGroup;
-import ru.practicum.shareit.CustomValidationException;
-import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +23,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto saveUser(@Validated({CreateValidationGroup.class}) @RequestBody UserDto userDto) {
+    public UserDto saveUser(@RequestBody UserDto userDto) {
         log.debug("POST {} body: {}", ROOT_PATH, userDto);
         User user = UserMapper.toUser(userDto);
         return UserMapper.toUserDto(userService.saveUser(user));
@@ -35,9 +31,8 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable("userId") Long userId,
-                              @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
+                              @RequestBody UserDto userDto) {
         log.debug("PATCH {}/{} body: {}", ROOT_PATH, userId, userDto);
-        validate(userDto);
         userDto.setId(userId);
         User user = UserMapper.toUser(userDto);
         return UserMapper.toUserDto(userService.updateUser(user));
@@ -61,11 +56,5 @@ public class UserController {
         return userService.getAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
-    }
-
-    private void validate(UserDto userDto) {
-        if (userDto.getName() != null && userDto.getName().isBlank()) {
-            throw new CustomValidationException("Invalid field 'name' for UserDto");
-        }
     }
 }
