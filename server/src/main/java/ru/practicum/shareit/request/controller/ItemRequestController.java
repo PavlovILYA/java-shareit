@@ -12,9 +12,6 @@ import ru.practicum.shareit.request.service.RequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,15 +25,13 @@ import static ru.practicum.shareit.request.controller.ItemRequestController.ROOT
 public class ItemRequestController {
     public static final String ROOT_PATH = "/requests";
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-    private static final String FROM_DEFAULT = "0";
-    private static final String SIZE_DEFAULT = "5";
 
     private final RequestService requestService;
     private final UserService userService;
 
     @PostMapping
     public ItemRequestResponseDto saveRequest(@RequestHeader(USER_ID_HEADER) Long userId,
-                                              @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
+                                              @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
         log.debug("POST {} userId={} body: {}", ROOT_PATH, userId, itemRequestCreateDto);
         User register = userService.getUser(userId);
         ItemRequest itemRequest = RequestMapper.toRequest(itemRequestCreateDto, register);
@@ -54,12 +49,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestResponseDto> getAlienRequests(@RequestHeader(USER_ID_HEADER) Long userId,
-                                                         @PositiveOrZero
-                                                         @RequestParam(name = "from", defaultValue = FROM_DEFAULT)
-                                                         int from,
-                                                         @Positive
-                                                         @RequestParam(name = "size", defaultValue = SIZE_DEFAULT)
-                                                         int size) {
+                                                         @RequestParam(name = "from") int from,
+                                                         @RequestParam(name = "size") int size) {
         log.debug("GET {}/all userId={} from={} size={}", ROOT_PATH, userId, from, size);
         User requester = userService.getUser(userId);
         return requestService.getAllAlien(requester, from, size).stream()
