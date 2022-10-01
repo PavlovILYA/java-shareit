@@ -8,8 +8,8 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.booking.exception.BookingValidationException;
 import ru.practicum.shareit.booking.exception.InvalidBookingStatusException;
 import ru.practicum.shareit.booking.exception.UnavailableItemException;
 import ru.practicum.shareit.item.exception.InvalidOwnerException;
@@ -24,11 +24,11 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class,
-                       CustomValidationException.class,
+//                       CustomValidationException.class,
                        MissingRequestHeaderException.class,
                        UnavailableItemException.class,
-                       BookingValidationException.class,
-                       InvalidBookingStatusException.class,
+                       BookingValidationException.class, // !
+                       InvalidBookingStatusException.class, // !
                        ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle400Exception(final Exception e) {

@@ -7,12 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.booking.exception.BookingValidationException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
+
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -20,29 +23,68 @@ import javax.validation.constraints.PositiveOrZero;
 @Slf4j
 @Validated
 public class BookingController {
+	private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+	private static final String STATE_DEFAULT = "ALL";
+	private static final String FROM_DEFAULT = "0";
+	private static final String SIZE_DEFAULT = "5";
+
 	private final BookingClient bookingClient;
 
-	@GetMapping
-	public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-			@RequestParam(name = "state", defaultValue = "all") String stateParam,
-			@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-			@Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-		BookingState state = BookingState.from(stateParam)
-				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-		log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-		return bookingClient.getBookings(userId, state, from, size);
+	@PostMapping
+	public ResponseEntity<Object> saveBooking(@Valid @RequestBody BookingCreateDto bookingCreateDto,
+											  @RequestHeader(USER_ID_HEADER) Long userId) {
+		validateBookingDuration(bookingCreateDto.getStart(), bookingCreateDto.getEnd());
+		log.debug("Creating booking: userId={}, body: {}", userId, bookingCreateDto);
+		return bookingClient.saveBooking(bookingCreateDto, userId);
 	}
 
-	@PostMapping
-	public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
-			@RequestBody @Valid BookItemRequestDto requestDto) {
-		log.info("Creating booking {}, userId={}", requestDto, userId);
-		return bookingClient.bookItem(userId, requestDto);
+	@PatchMapping("/{bookingId}")
+	public ResponseEntity<Object> approveBooking(@PathVariable("bookingId") Long bookingId,
+												 @RequestParam("approved") Boolean approved,
+												 @RequestHeader(USER_ID_HEADER) Long userId) {
+		log.debug("Approving booking {}: userId={}, approved={}}", bookingId, userId, approved);
+		return bookingClient.approveBooking(bookingId, approved, userId);
 	}
 
 	@GetMapping("/{bookingId}")
-	public ResponseEntity<Object> getBooking(@RequestHeader("X-Sharer-User-Id") long userId,
-			@PathVariable Long bookingId) {
-		log.info("Get booking {}, userId={}", bookingId, userId);
-		return bookingClient.getBooking(userId, bookingId);
-	}}
+	public ResponseEntity<Object> getBooking(@PathVariable("bookingId") Long bookingId,
+											 @RequestHeader(USER_ID_HEADER) Long userId) {
+		log.debug("Get booking {}: userId={}}", bookingId, userId);
+		return bookingClient.getBooking(bookingId, userId);
+	}
+
+	@GetMapping
+	public ResponseEntity<Object> getMyBookingRequests(@RequestParam(name = "state", defaultValue = STATE_DEFAULT)
+													   String state,
+													   @RequestHeader(USER_ID_HEADER) Long userId,
+													   @PositiveOrZero
+													   @RequestParam(name = "from", defaultValue = FROM_DEFAULT)
+													   int from,
+													   @Positive
+													   @RequestParam(name = "size", defaultValue = SIZE_DEFAULT)
+													   int size) {
+		BookingState bookingState = BookingState.fromString(state);
+		log.debug("Get bookings that user {} books: state={}, from={}, size={}", userId, state, from, size);
+		return bookingClient.getMyBookingRequests(bookingState, userId, from, size);
+	}
+
+	@GetMapping("/owner")
+	public ResponseEntity<Object> getMyBookings(@RequestParam(name = "state", defaultValue = STATE_DEFAULT)
+												  String state,
+												  @RequestHeader(USER_ID_HEADER) Long userId,
+												  @PositiveOrZero
+												  @RequestParam(name = "from", defaultValue = FROM_DEFAULT) int from,
+												  @Positive
+												  @RequestParam(name = "size", defaultValue = SIZE_DEFAULT) int size) {
+		BookingState bookingState = BookingState.fromString(state);
+		log.debug("Get bookings that user {} owns: state={} from={} size={}", userId, state, from, size);
+		return bookingClient.getMyBookings(bookingState, userId, from, size);
+	}
+
+	private void validateBookingDuration(LocalDateTime start, LocalDateTime end) {
+		if (start.isAfter(end)) {
+			throw new BookingValidationException("Start time (" + start +
+					") is after then end time (" + end + ")");
+		}
+	}
+}

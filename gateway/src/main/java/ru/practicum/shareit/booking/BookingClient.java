@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.booking.dto.BookItemRequestDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 
@@ -26,7 +26,22 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
+    public ResponseEntity<Object> saveBooking(BookingCreateDto bookingCreateDto, Long userId) {
+        return post("", userId, bookingCreateDto);
+    }
+
+    public ResponseEntity<Object> approveBooking(Long bookingId, Boolean approved, Long userId) {
+        Map<String, Object> parameters = Map.of(
+                "approved", Boolean.TRUE
+        );
+        return patch("/" + bookingId + "?approved={approved}", userId, parameters);
+    }
+
+    public ResponseEntity<Object> getBooking(Long bookingId, Long userId) {
+        return get("/" + bookingId, userId);
+    }
+
+    public ResponseEntity<Object> getMyBookingRequests(BookingState state, Long userId, int from, int size) {
         Map<String, Object> parameters = Map.of(
                 "state", state.name(),
                 "from", from,
@@ -35,12 +50,12 @@ public class BookingClient extends BaseClient {
         return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
-
-    public ResponseEntity<Object> bookItem(long userId, BookItemRequestDto requestDto) {
-        return post("", userId, requestDto);
-    }
-
-    public ResponseEntity<Object> getBooking(long userId, Long bookingId) {
-        return get("/" + bookingId, userId);
+    public ResponseEntity<Object> getMyBookings(BookingState state, Long userId, int from, int size) {
+        Map<String, Object> parameters = Map.of(
+                "state", state.name(),
+                "from", from,
+                "size", size
+        );
+        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
 }
