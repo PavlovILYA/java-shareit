@@ -64,7 +64,7 @@ public class BookingController {
 													   @RequestParam(name = "size", defaultValue = SIZE_DEFAULT)
 													   int size) {
 		BookingState bookingState = BookingState.fromString(state);
-		log.debug("Get bookings that user {} books: state={}, from={}, size={}", userId, state, from, size);
+		log.debug("Get bookings that user {} booked: state={}, from={}, size={}", userId, state, from, size);
 		return bookingClient.getMyBookingRequests(bookingState, userId, from, size);
 	}
 
@@ -77,7 +77,7 @@ public class BookingController {
 												  @Positive
 												  @RequestParam(name = "size", defaultValue = SIZE_DEFAULT) int size) {
 		BookingState bookingState = BookingState.fromString(state);
-		log.debug("Get bookings that user {} owns: state={} from={} size={}", userId, state, from, size);
+		log.debug("Get bookings that user {} owns: state={}, from={}, size={}", userId, state, from, size);
 		return bookingClient.getMyBookings(bookingState, userId, from, size);
 	}
 

@@ -31,7 +31,7 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<Object> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                            @Validated({CreateValidationGroup.class}) @RequestBody ItemDto itemDto) {
-        log.debug("Creating item: userId={} body: {}", userId, itemDto);
+        log.debug("Creating item: userId={}, body: {}", userId, itemDto);
         return itemClient.saveItem(userId, itemDto);
     }
 
@@ -40,14 +40,14 @@ public class ItemController {
                                              @PathVariable("itemId") Long itemId,
                                              @Validated({UpdateValidationGroup.class}) @RequestBody ItemDto itemDto) {
         validate(itemDto);
-        log.debug("Updating item: userId={}, itemId={} body: {}", userId, itemId, itemDto);
+        log.debug("Updating item {}: userId={}, body: {}", itemId, userId, itemDto);
         return itemClient.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                           @PathVariable("itemId") Long itemId) {
-        log.debug("Get item: userId={}, itemId={}", itemId, userId);
+        log.debug("Get item {}: userId={}", itemId, userId);
         return itemClient.getItem(userId, itemId);
     }
 
@@ -57,7 +57,7 @@ public class ItemController {
                                              @RequestParam(name = "from", defaultValue = FROM_DEFAULT) int from,
                                              @Positive
                                              @RequestParam(name = "size", defaultValue = SIZE_DEFAULT) int size) {
-        log.debug("Get items by user: userId={}, from={}, size={}", userId, from, size);
+        log.debug("Get items that user {} owns: from={}, size={}", userId, from, size);
         return itemClient.getMyItems(userId, from, size);
     }
 
@@ -68,7 +68,7 @@ public class ItemController {
                                          @RequestParam(name = "from", defaultValue = FROM_DEFAULT) int from,
                                          @Positive
                                          @RequestParam(name = "size", defaultValue = SIZE_DEFAULT) int size) {
-        log.debug("Get items by template: userId={} from={} size={} text={}", userId, from, size, text);
+        log.debug("Get items by template: userId={}, from={}, size={}, text={}", userId, from, size, text);
         if (text == null || text.isBlank()) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }

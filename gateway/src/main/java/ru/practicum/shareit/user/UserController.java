@@ -28,25 +28,25 @@ public class UserController {
                               @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
         validate(userDto);
         userDto.setId(userId);
-        log.debug("Updating user: id={} {}", userId, userDto);
+        log.debug("Updating user {}: {}", userId, userDto);
         return userClient.updateUser(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable("userId") Long userId) {
-        log.debug("Deliting user: id={}", userId);
+        log.debug("Deleting user {}", userId);
         userClient.deleteUser(userId);
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUser(@PathVariable("userId") Long userId) {
-        log.debug("Getting user id={}", userId);
+        log.debug("Get user {}", userId);
         return userClient.getUser(userId);
     }
 
     @GetMapping
     public ResponseEntity<Object> getAll() {
-        log.debug("Getting all users");
+        log.debug("Get all users");
         return userClient.getAll();
     }
 
