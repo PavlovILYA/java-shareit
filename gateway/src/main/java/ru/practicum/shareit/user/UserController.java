@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.CreateValidationGroup;
 import ru.practicum.shareit.CustomValidationException;
 import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.user.dto.UserDto;
 
 @Slf4j
 @RestController
