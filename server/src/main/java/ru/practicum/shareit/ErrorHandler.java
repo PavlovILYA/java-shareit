@@ -24,11 +24,10 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class,
-//                       CustomValidationException.class,
                        MissingRequestHeaderException.class,
                        UnavailableItemException.class,
-                       BookingValidationException.class, // !
-                       InvalidBookingStatusException.class, // !
+                       BookingValidationException.class,
+                       InvalidBookingStatusException.class,
                        ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle400Exception(final Exception e) {
