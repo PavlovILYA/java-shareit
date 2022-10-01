@@ -11,20 +11,18 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.user.controller.UserController.ROOT_PATH;
+import static ru.practicum.shareit.Constants.USER_API_PREFIX;
 
 @Slf4j
 @RestController
-@RequestMapping(path = ROOT_PATH)
+@RequestMapping(path = USER_API_PREFIX)
 @RequiredArgsConstructor
 public class UserController {
-    public static final String ROOT_PATH = "/users";
-
     private final UserService userService;
 
     @PostMapping
     public UserDto saveUser(@RequestBody UserDto userDto) {
-        log.debug("POST {} body: {}", ROOT_PATH, userDto);
+        log.debug("POST {} body: {}", USER_API_PREFIX, userDto);
         User user = UserMapper.toUser(userDto);
         return UserMapper.toUserDto(userService.saveUser(user));
     }
@@ -32,7 +30,7 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable("userId") Long userId,
                               @RequestBody UserDto userDto) {
-        log.debug("PATCH {}/{} body: {}", ROOT_PATH, userId, userDto);
+        log.debug("PATCH {}/{} body: {}", USER_API_PREFIX, userId, userDto);
         userDto.setId(userId);
         User user = UserMapper.toUser(userDto);
         return UserMapper.toUserDto(userService.updateUser(user));
@@ -40,19 +38,19 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable("userId") Long userId) {
-        log.debug("DELETE {}/{}", ROOT_PATH, userId);
+        log.debug("DELETE {}/{}", USER_API_PREFIX, userId);
         userService.deleteUser(userId);
     }
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable("userId") Long userId) {
-        log.debug("GET {}/{}", ROOT_PATH, userId);
+        log.debug("GET {}/{}", USER_API_PREFIX, userId);
         return UserMapper.toUserDto(userService.getUser(userId));
     }
 
     @GetMapping
     public List<UserDto> getAll() {
-        log.debug("GET {}", ROOT_PATH);
+        log.debug("GET {}", USER_API_PREFIX);
         return userService.getAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());

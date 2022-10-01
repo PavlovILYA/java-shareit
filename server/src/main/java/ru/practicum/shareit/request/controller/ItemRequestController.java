@@ -15,24 +15,22 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.request.controller.ItemRequestController.ROOT_PATH;
+import static ru.practicum.shareit.Constants.REQUEST_API_PREFIX;
+import static ru.practicum.shareit.Constants.USER_ID_HEADER;
 
 @Slf4j
 @Validated
 @RestController
-@RequestMapping(path = ROOT_PATH)
+@RequestMapping(path = REQUEST_API_PREFIX)
 @RequiredArgsConstructor
 public class ItemRequestController {
-    public static final String ROOT_PATH = "/requests";
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-
     private final RequestService requestService;
     private final UserService userService;
 
     @PostMapping
     public ItemRequestResponseDto saveRequest(@RequestHeader(USER_ID_HEADER) Long userId,
                                               @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
-        log.debug("POST {} userId={} body: {}", ROOT_PATH, userId, itemRequestCreateDto);
+        log.debug("POST {} userId={} body: {}", REQUEST_API_PREFIX, userId, itemRequestCreateDto);
         User register = userService.getUser(userId);
         ItemRequest itemRequest = RequestMapper.toRequest(itemRequestCreateDto, register);
         return RequestMapper.toRequestDto(requestService.saveRequest(itemRequest));
@@ -40,7 +38,7 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestResponseDto> getMyRequests(@RequestHeader(USER_ID_HEADER) Long userId) {
-        log.debug("GET {} userId={}", ROOT_PATH, userId);
+        log.debug("GET {} userId={}", REQUEST_API_PREFIX, userId);
         User requester = userService.getUser(userId);
         return requestService.getAllByRequester(requester).stream()
                 .map(RequestMapper::toRequestDto)
@@ -51,7 +49,7 @@ public class ItemRequestController {
     public List<ItemRequestResponseDto> getAlienRequests(@RequestHeader(USER_ID_HEADER) Long userId,
                                                          @RequestParam(name = "from") int from,
                                                          @RequestParam(name = "size") int size) {
-        log.debug("GET {}/all userId={} from={} size={}", ROOT_PATH, userId, from, size);
+        log.debug("GET {}/all userId={} from={} size={}", REQUEST_API_PREFIX, userId, from, size);
         User requester = userService.getUser(userId);
         return requestService.getAllAlien(requester, from, size).stream()
                 .map(RequestMapper::toRequestDto)
@@ -61,7 +59,7 @@ public class ItemRequestController {
     @GetMapping("/{requestId}")
     public ItemRequestResponseDto getRequestById(@RequestHeader(USER_ID_HEADER) Long userId,
                                                  @PathVariable("requestId") Long requestId) {
-        log.debug("GET {}/{} userId={}", ROOT_PATH, requestId, userId);
+        log.debug("GET {}/{} userId={}", REQUEST_API_PREFIX, requestId, userId);
         userService.getUser(userId);
         return RequestMapper.toRequestDto(requestService.getRequestById(requestId));
     }

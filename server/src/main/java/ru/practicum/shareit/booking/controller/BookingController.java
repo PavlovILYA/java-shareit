@@ -19,17 +19,15 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.controller.BookingController.ROOT_PATH;
+import static ru.practicum.shareit.Constants.BOOKING_API_PREFIX;
+import static ru.practicum.shareit.Constants.USER_ID_HEADER;
 
 @Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = ROOT_PATH)
+@RequestMapping(path = BOOKING_API_PREFIX)
 public class BookingController {
-    public static final String ROOT_PATH = "/bookings";
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
@@ -37,7 +35,7 @@ public class BookingController {
     @PostMapping
     public BookingCreateDto saveBooking(@RequestBody BookingCreateDto bookingCreateDto,
                                         @RequestHeader(USER_ID_HEADER) Long userId) {
-        log.debug("POST {} userId={} body: {}", ROOT_PATH, userId, bookingCreateDto);
+        log.debug("POST {} userId={} body: {}", BOOKING_API_PREFIX, userId, bookingCreateDto);
         Item item = itemService.getItem(bookingCreateDto.getItemId());
         User booker = userService.getUser(userId);
         compareBookerAndItemOwner(booker, item);
@@ -50,7 +48,7 @@ public class BookingController {
     public BookingResponseDto approveBooking(@PathVariable("bookingId") Long bookingId,
                                              @RequestParam("approved") Boolean approved,
                                              @RequestHeader(USER_ID_HEADER) Long userId) {
-        log.debug("PATCH {}/{} userId={} approved={}}", ROOT_PATH, bookingId, userId, approved);
+        log.debug("PATCH {}/{} userId={} approved={}}", BOOKING_API_PREFIX, bookingId, userId, approved);
         return BookingMapper.toBookingResponseDto(
                 bookingService.approveBooking(bookingId, approved, userId));
     }
@@ -58,7 +56,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingResponseDto getBooking(@PathVariable("bookingId") Long bookingId,
                                          @RequestHeader(USER_ID_HEADER) Long userId) {
-        log.debug("GET {}/{} userId={}}", ROOT_PATH, bookingId, userId);
+        log.debug("GET {}/{} userId={}}", BOOKING_API_PREFIX, bookingId, userId);
         return BookingMapper.toBookingResponseDto(
                 bookingService.getBookingById(bookingId, userId));
     }
@@ -68,7 +66,7 @@ public class BookingController {
                                                          @RequestHeader(USER_ID_HEADER) Long userId,
                                                          @RequestParam(name = "from") int from,
                                                          @RequestParam(name = "size") int size) {
-        log.debug("GET {} userId={} state={} from={} size={}", ROOT_PATH, userId, state, from, size);
+        log.debug("GET {} userId={} state={} from={} size={}", BOOKING_API_PREFIX, userId, state, from, size);
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingRequestsByUserId(userId, bookingState, from, size).stream()
                 .map(BookingMapper::toBookingResponseDto)
@@ -80,7 +78,7 @@ public class BookingController {
                                                   @RequestHeader(USER_ID_HEADER) Long userId,
                                                   @RequestParam(name = "from") int from,
                                                   @RequestParam(name = "size") int size) {
-        log.debug("GET {}/owner userId={} state={} from={} size={}", ROOT_PATH, userId, state, from, size);
+        log.debug("GET {}/owner userId={} state={} from={} size={}", BOOKING_API_PREFIX, userId, state, from, size);
         BookingState bookingState = BookingState.fromString(state);
         return bookingService.getBookingsByOwnerId(userId, bookingState, from, size).stream()
                 .map(BookingMapper::toBookingResponseDto)

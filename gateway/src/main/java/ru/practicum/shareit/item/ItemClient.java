@@ -13,15 +13,14 @@ import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Map;
 
+import static ru.practicum.shareit.Constants.ITEM_API_PREFIX;
+
 @Service
 public class ItemClient extends BaseClient {
-    private static final String API_PREFIX = "/items";
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-
     @Autowired
     public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(builder
-                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
+                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + ITEM_API_PREFIX))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)
                 .build());
     }

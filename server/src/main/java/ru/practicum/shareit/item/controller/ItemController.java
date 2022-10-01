@@ -21,17 +21,15 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.controller.ItemController.ROOT_PATH;
+import static ru.practicum.shareit.Constants.ITEM_API_PREFIX;
+import static ru.practicum.shareit.Constants.USER_ID_HEADER;
 
 @Slf4j
 @Validated
 @RestController
-@RequestMapping(ROOT_PATH)
+@RequestMapping(ITEM_API_PREFIX)
 @RequiredArgsConstructor
 public class ItemController {
-    public static final String ROOT_PATH = "/items";
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-
     private final ItemService itemService;
     private final UserService userService;
     private final BookingService bookingService;
@@ -40,7 +38,7 @@ public class ItemController {
     @PostMapping
     public ItemDto saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
                             @RequestBody ItemDto itemDto) {
-        log.debug("POST {} userId={} body: {}", ROOT_PATH, userId, itemDto);
+        log.debug("POST {} userId={} body: {}", ITEM_API_PREFIX, userId, itemDto);
         User owner = userService.getUser(userId);
         ItemRequest itemRequest = itemDto.getRequestId() == null
                 ? null
@@ -53,7 +51,7 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader(USER_ID_HEADER) Long userId,
                               @PathVariable("itemId") Long itemId,
                               @RequestBody ItemDto itemDto) {
-        log.debug("PATCH {}/{} userId={} body: {}", ROOT_PATH, itemId, userId, itemDto);
+        log.debug("PATCH {}/{} userId={} body: {}", ITEM_API_PREFIX, itemId, userId, itemDto);
         itemDto.setId(itemId);
         User owner = userService.getUser(userId);
         Item item = ItemMapper.toItem(itemDto, owner, null);
@@ -63,7 +61,7 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemResponseDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                    @PathVariable("itemId") Long itemId) {
-        log.debug("GET {}/{} userId={}", ROOT_PATH, itemId, userId);
+        log.debug("GET {}/{} userId={}", ITEM_API_PREFIX, itemId, userId);
         Item item = itemService.getItem(itemId);
         return ItemMapper.toItemResponseDto(item,
                 item.getOwner().getId().equals(userId) ? bookingService.getLastBookingByItem(item) : null,
@@ -74,7 +72,7 @@ public class ItemController {
     public List<ItemResponseDto> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId,
                                             @RequestParam(name = "from") int from,
                                             @RequestParam(name = "size") int size) {
-        log.debug("GET {} userId={} from={} size={}", ROOT_PATH, userId, from, size);
+        log.debug("GET {} userId={} from={} size={}", ITEM_API_PREFIX, userId, from, size);
         return itemService.getAllByUserId(userId, from, size).stream()
                 .map(item -> ItemMapper.toItemResponseDto(item,
                         bookingService.getLastBookingByItem(item),
@@ -87,7 +85,7 @@ public class ItemController {
                                 @RequestParam(name = "text") String text,
                                 @RequestParam(name = "from") int from,
                                 @RequestParam(name = "size") int size) {
-        log.debug("GET {}/search userId={} from={} size={} text={}", ROOT_PATH, userId, from, size, text);
+        log.debug("GET {}/search userId={} from={} size={} text={}", ITEM_API_PREFIX, userId, from, size, text);
         return itemService.getAllByTemplate(text, from, size).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -97,7 +95,7 @@ public class ItemController {
     public CommentResponseDto saveComment(@PathVariable("itemId") Long itemId,
                                           @RequestBody CommentCreateDto commentCreateDto,
                                           @RequestHeader(USER_ID_HEADER) Long userId) {
-        log.debug("POST {}/{}/comment userId={} body: {}", ROOT_PATH, itemId, userId, commentCreateDto);
+        log.debug("POST {}/{}/comment userId={} body: {}", ITEM_API_PREFIX, itemId, userId, commentCreateDto);
         User author = userService.getUser(userId);
         Item item = itemService.getItem(itemId);
         Comment comment = ItemMapper.toComment(commentCreateDto, author, item);

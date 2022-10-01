@@ -16,18 +16,15 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 
+import static ru.practicum.shareit.Constants.*;
+
 
 @Controller
-@RequestMapping(path = "/bookings")
+@RequestMapping(path = BOOKING_API_PREFIX)
 @RequiredArgsConstructor
 @Slf4j
 @Validated
 public class BookingController {
-	private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-	private static final String STATE_DEFAULT = "ALL";
-	private static final String FROM_DEFAULT = "0";
-	private static final String SIZE_DEFAULT = "5";
-
 	private final BookingClient bookingClient;
 
 	@PostMapping

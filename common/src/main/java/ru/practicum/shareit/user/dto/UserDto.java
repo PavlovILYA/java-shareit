@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.CreateValidationGroup;
-import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.validation.group.CreateValidationGroup;
+import ru.practicum.shareit.validation.group.UpdateValidationGroup;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.CreateValidationGroup;
+import ru.practicum.shareit.validation.group.CreateValidationGroup;
 import ru.practicum.shareit.CustomValidationException;
-import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.validation.group.UpdateValidationGroup;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
@@ -17,16 +17,14 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 
+import static ru.practicum.shareit.Constants.*;
+
 @Slf4j
 @RestController
-@RequestMapping("/items")
+@RequestMapping(ITEM_API_PREFIX)
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemClient itemClient;
-
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-    private static final String FROM_DEFAULT = "0";
-    private static final String SIZE_DEFAULT = "5";
 
     @PostMapping
     public ResponseEntity<Object> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,

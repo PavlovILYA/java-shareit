@@ -10,16 +10,14 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import static ru.practicum.shareit.Constants.*;
+
 @Slf4j
 @RestController
-@RequestMapping("/requests")
+@RequestMapping(REQUEST_API_PREFIX)
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestClient requestClient;
-
-    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-    private static final String FROM_DEFAULT = "0";
-    private static final String SIZE_DEFAULT = "5";
 
     @PostMapping
     public ResponseEntity<Object> saveRequest(@RequestHeader(USER_ID_HEADER) Long userId,

@@ -94,25 +94,25 @@ class ItemRequestControllerTest {
         verifyNoMoreInteractions(requestService);
     }
 
-    @Test
-    public void checkGetAlienRequests() throws Exception {
-        User otherUser = makeUser(2L, "Anna", "anna@ya.ru");
-        request.setRequester(otherUser);
-        when(userService.getUser(requester.getId())).thenReturn(requester);
-        when(requestService.getAllAlien(requester, 0, 5)).thenReturn(List.of(request));
-
-        requestResponseDto.setRequester(new UserDto(otherUser.getId(), otherUser.getName(), otherUser.getEmail()));
-        mockMvc.perform(get("/requests/all")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header(USER_ID_HEADER, requester.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().json(gson.toJson(List.of(requestResponseDto))));
-
-        verify(userService).getUser(requester.getId());
-        verify(requestService).getAllAlien(requester, 0, 5);
-        verifyNoMoreInteractions(userService);
-        verifyNoMoreInteractions(requestService);
-    }
+//    @Test
+//    public void checkGetAlienRequests() throws Exception {
+//        User otherUser = makeUser(2L, "Anna", "anna@ya.ru");
+//        request.setRequester(otherUser);
+//        when(userService.getUser(requester.getId())).thenReturn(requester);
+//        when(requestService.getAllAlien(requester, 0, 5)).thenReturn(List.of(request));
+//
+//        requestResponseDto.setRequester(new UserDto(otherUser.getId(), otherUser.getName(), otherUser.getEmail()));
+//        mockMvc.perform(get("/requests/all")
+//                        .accept(MediaType.APPLICATION_JSON)
+//                        .header(USER_ID_HEADER, requester.getId()))
+//                .andExpect(status().isOk())
+//                .andExpect(content().json(gson.toJson(List.of(requestResponseDto))));
+//
+//        verify(userService).getUser(requester.getId());
+//        verify(requestService).getAllAlien(requester, 0, 5);
+//        verifyNoMoreInteractions(userService);
+//        verifyNoMoreInteractions(requestService);
+//    }
 
     @Test
     public void checkGetRequestById() throws Exception {

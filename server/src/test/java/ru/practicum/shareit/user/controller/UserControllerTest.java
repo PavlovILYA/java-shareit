@@ -80,17 +80,17 @@ public class UserControllerTest {
         verifyNoMoreInteractions(userService);
     }
 
-    @Test
-    public void checkUpdateUser_validException() throws Exception {
-        userDto.setName("");
-        mockMvc.perform(patch("/users/{userId}", 2L)
-                        .content(gson.toJson(userDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(userService);
-    }
+//    @Test
+//    public void checkUpdateUser_validException() throws Exception {
+//        userDto.setName("");
+//        mockMvc.perform(patch("/users/{userId}", 2L)
+//                        .content(gson.toJson(userDto))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isBadRequest());
+//
+//        verifyNoInteractions(userService);
+//    }
 
     @Test
     public void checkUpdateUser_updated() throws Exception {

@@ -5,14 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.CreateValidationGroup;
+import ru.practicum.shareit.validation.group.CreateValidationGroup;
 import ru.practicum.shareit.CustomValidationException;
-import ru.practicum.shareit.UpdateValidationGroup;
+import ru.practicum.shareit.validation.group.UpdateValidationGroup;
 import ru.practicum.shareit.user.dto.UserDto;
+
+import static ru.practicum.shareit.Constants.USER_API_PREFIX;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping(USER_API_PREFIX)
 @RequiredArgsConstructor
 public class UserController {
     private final UserClient userClient;
