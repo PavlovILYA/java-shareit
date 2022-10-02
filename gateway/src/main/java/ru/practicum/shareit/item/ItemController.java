@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import static ru.practicum.shareit.Constants.*;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping(ITEM_API_PREFIX)
 @RequiredArgsConstructor

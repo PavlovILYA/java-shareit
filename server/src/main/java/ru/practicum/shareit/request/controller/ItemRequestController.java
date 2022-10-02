@@ -2,7 +2,6 @@ package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.RequestMapper;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -19,7 +18,6 @@ import static ru.practicum.shareit.Constants.REQUEST_API_PREFIX;
 import static ru.practicum.shareit.Constants.USER_ID_HEADER;
 
 @Slf4j
-@Validated
 @RestController
 @RequestMapping(path = REQUEST_API_PREFIX)
 @RequiredArgsConstructor

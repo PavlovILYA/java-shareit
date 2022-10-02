@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
@@ -25,7 +24,6 @@ import static ru.practicum.shareit.Constants.ITEM_API_PREFIX;
 import static ru.practicum.shareit.Constants.USER_ID_HEADER;
 
 @Slf4j
-@Validated
 @RestController
 @RequestMapping(ITEM_API_PREFIX)
 @RequiredArgsConstructor

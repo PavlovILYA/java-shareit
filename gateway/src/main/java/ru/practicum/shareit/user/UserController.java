@@ -27,7 +27,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable("userId") Long userId,
-                              @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
+                                             @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
         validate(userDto);
         userDto.setId(userId);
         log.debug("Updating user {}: {}", userId, userDto);
