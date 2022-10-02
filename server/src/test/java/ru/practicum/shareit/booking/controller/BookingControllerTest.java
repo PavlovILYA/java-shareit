@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -23,6 +24,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -93,21 +95,6 @@ public class BookingControllerTest {
         verifyNoMoreInteractions(bookingService);
     }
 
-//    @Test
-//    public void checkSaveBooking_durationException() throws Exception {
-//        bookingCreateDto.setEnd(LocalDateTime.of(2021, 10, 11, 10, 10, 10));
-//        mockMvc.perform(post("/bookings")
-//                        .content(gson.toJson(bookingCreateDto))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .header(USER_ID_HEADER, booker.getId())
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isBadRequest());
-//
-//        verifyNoInteractions(itemService);
-//        verifyNoInteractions(userService);
-//        verifyNoInteractions(bookingService);
-//    }
-
     @Test
     public void checkSaveBooking_bookerIsOwnerException() throws Exception {
         item.setOwner(booker);
@@ -173,36 +160,36 @@ public class BookingControllerTest {
         verifyNoInteractions(bookingService);
     }
 
-//    @Test
-//    public void checkGetMyBookingRequests() throws Exception {
-//        when(bookingService.getBookingRequestsByUserId(booker.getId(), BookingState.WAITING, 0, 5))
-//                .thenReturn(List.of(booking));
-//
-//        mockMvc.perform(get("/bookings", 1L)
-//                        .header(USER_ID_HEADER, booker.getId())
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .param("state", "WAITING"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().json(gson.toJson(List.of(bookingResponseDto))));
-//
-//        verify(bookingService).getBookingRequestsByUserId(booker.getId(), BookingState.WAITING, 0, 5);
-//        verifyNoMoreInteractions(bookingService);
-//    }
+    @Test
+    public void checkGetMyBookingRequests() throws Exception {
+        when(bookingService.getBookingRequestsByUserId(booker.getId(), BookingState.WAITING, 0, 5))
+                .thenReturn(List.of(booking));
 
-//    @Test
-//    public void checkGetMyBookings() throws Exception {
-//        Long myId = 2L;
-//        when(bookingService.getBookingRequestsByUserId(myId, BookingState.WAITING, 0, 5))
-//                .thenReturn(List.of(booking));
-//
-//        mockMvc.perform(get("/bookings", 1L)
-//                        .header(USER_ID_HEADER, myId)
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .param("state", "WAITING"))
-//                .andExpect(status().isOk())
-//                .andExpect(content().json(gson.toJson(List.of(bookingResponseDto))));
-//
-//        verify(bookingService).getBookingRequestsByUserId(myId, BookingState.WAITING, 0, 5);
-//        verifyNoMoreInteractions(bookingService);
-//    }
+        mockMvc.perform(get("/bookings?from=0&size=5", 1L)
+                        .header(USER_ID_HEADER, booker.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .param("state", "WAITING"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(gson.toJson(List.of(bookingResponseDto))));
+
+        verify(bookingService).getBookingRequestsByUserId(booker.getId(), BookingState.WAITING, 0, 5);
+        verifyNoMoreInteractions(bookingService);
+    }
+
+    @Test
+    public void checkGetMyBookings() throws Exception {
+        Long myId = 2L;
+        when(bookingService.getBookingRequestsByUserId(myId, BookingState.WAITING, 0, 5))
+                .thenReturn(List.of(booking));
+
+        mockMvc.perform(get("/bookings?from=0&size=5", 1L)
+                        .header(USER_ID_HEADER, myId)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .param("state", "WAITING"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(gson.toJson(List.of(bookingResponseDto))));
+
+        verify(bookingService).getBookingRequestsByUserId(myId, BookingState.WAITING, 0, 5);
+        verifyNoMoreInteractions(bookingService);
+    }
 }
