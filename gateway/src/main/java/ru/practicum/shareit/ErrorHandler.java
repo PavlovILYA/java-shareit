@@ -24,7 +24,14 @@ public class ErrorHandler {
                        ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle400Exception(final Exception e) {
-        log.error("Response HTTP {} {}", HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        log.debug("Response HTTP {} {}", HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handle500Exception(final Throwable e) {
+        log.error("Response HTTP {} {}", HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
     }
 }

@@ -31,7 +31,7 @@ public class ErrorHandler {
                        ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle400Exception(final Exception e) {
-        log.error("Response HTTP {} {}", HttpStatus.BAD_REQUEST.value(), e.getMessage());
+        log.debug("Response HTTP {} {}", HttpStatus.BAD_REQUEST.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
@@ -41,21 +41,28 @@ public class ErrorHandler {
                        RequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handle404Exception(final Exception e) {
-        log.error("Response HTTP {} {}", HttpStatus.NOT_FOUND.value(), e.getMessage());
+        log.debug("Response HTTP {} {}", HttpStatus.NOT_FOUND.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
     @ExceptionHandler(InvalidOwnerException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handle403Exception(final InvalidOwnerException e) {
-        log.error("Response HTTP {} {}", HttpStatus.FORBIDDEN.value(), e.getMessage());
+        log.debug("Response HTTP {} {}", HttpStatus.FORBIDDEN.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.FORBIDDEN.value(), e.getMessage());
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handle409Exception(final Exception e) {
-        log.error("Response HTTP {} {}", HttpStatus.CONFLICT.value(), e.getMessage());
+        log.debug("Response HTTP {} {}", HttpStatus.CONFLICT.value(), e.getMessage());
         return new ErrorResponse(LocalDateTime.now(), HttpStatus.CONFLICT.value(), e.getMessage());
+    }
+
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handle500Exception(final Throwable e) {
+        log.error("Response HTTP {} {}", HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        return new ErrorResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
     }
 }

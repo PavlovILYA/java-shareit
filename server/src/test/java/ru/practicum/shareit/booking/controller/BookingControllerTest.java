@@ -151,7 +151,7 @@ public class BookingControllerTest {
 
     @Test
     public void checkGetMyBookingRequests_wrongStateException() throws Exception {
-        mockMvc.perform(get("/bookings")
+        mockMvc.perform(get("/bookings?from=0&size=5")
                         .header(USER_ID_HEADER, booker.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .param("state", "WRONG STATE"))
