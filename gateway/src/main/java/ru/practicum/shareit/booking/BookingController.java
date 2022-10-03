@@ -77,7 +77,7 @@ public class BookingController {
 	}
 
 	private void validateBookingDuration(LocalDateTime start, LocalDateTime end) {
-		if (start.isAfter(end)) {
+		if (!start.isBefore(end)) {
 			throw new BookingValidationException("Start time (" + start +
 					") is after then end time (" + end + ")");
 		}
