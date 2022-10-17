@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,9 +26,11 @@ import static ru.practicum.shareit.Constants.*;
 @RestController
 @RequestMapping(ITEM_API_PREFIX)
 @RequiredArgsConstructor
+@Tag(name = "Item-контроллер", description = "Позволяет управлять вещами для аренды")
 public class ItemController {
     private final ItemClient itemClient;
 
+    @Operation(summary = "Создание вещи")
     @PostMapping
     public ResponseEntity<Object> saveItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                            @Validated({CreateValidationGroup.class}) @RequestBody ItemDto itemDto) {
@@ -34,6 +38,7 @@ public class ItemController {
         return itemClient.saveItem(userId, itemDto);
     }
 
+    @Operation(summary = "Изменение вещи")
     @PatchMapping("/{itemId}")
     public ResponseEntity<Object> updateItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                              @PathVariable("itemId") Long itemId,
@@ -43,6 +48,7 @@ public class ItemController {
         return itemClient.updateItem(userId, itemId, itemDto);
     }
 
+    @Operation(summary = "Получение вещи")
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> getItem(@RequestHeader(USER_ID_HEADER) Long userId,
                                           @PathVariable("itemId") Long itemId) {
@@ -50,6 +56,7 @@ public class ItemController {
         return itemClient.getItem(userId, itemId);
     }
 
+    @Operation(summary = "Получение вещей вещей, которые пользователь сдает в аренду")
     @GetMapping
     public ResponseEntity<Object> getMyItems(@RequestHeader(USER_ID_HEADER) Long userId,
                                              @PositiveOrZero
@@ -60,6 +67,7 @@ public class ItemController {
         return itemClient.getMyItems(userId, from, size);
     }
 
+    @Operation(summary = "Получение вещей вещей, которые можно арендовать у других")
     @GetMapping("/search")
     public ResponseEntity<Object> search(@RequestHeader(USER_ID_HEADER) Long userId,
                                          @RequestParam(name = "text", defaultValue = "") String text,
@@ -74,6 +82,7 @@ public class ItemController {
         return itemClient.search(userId, text, from, size);
     }
 
+    @Operation(summary = "Оставить комментарий к вещи")
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> saveComment(@PathVariable("itemId") Long itemId,
                                               @Valid @RequestBody CommentCreateDto commentCreateDto,

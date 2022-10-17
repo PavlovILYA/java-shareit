@@ -1,5 +1,7 @@
 package ru.practicum.shareit.user;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +18,18 @@ import static ru.practicum.shareit.Constants.USER_API_PREFIX;
 @RestController
 @RequestMapping(USER_API_PREFIX)
 @RequiredArgsConstructor
+@Tag(name = "User-контроллер", description = "Позволяет управлять пользователями")
 public class UserController {
     private final UserClient userClient;
 
+    @Operation(summary = "Создание пользователя")
     @PostMapping
     public ResponseEntity<Object> saveUser(@Validated({CreateValidationGroup.class}) @RequestBody UserDto userDto) {
         log.debug("Creating user: {}", userDto);
         return userClient.saveUser(userDto);
     }
 
+    @Operation(summary = "Обновление пользователя")
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable("userId") Long userId,
                                              @Validated({UpdateValidationGroup.class}) @RequestBody UserDto userDto) {
@@ -34,18 +39,21 @@ public class UserController {
         return userClient.updateUser(userId, userDto);
     }
 
+    @Operation(summary = "Удаление пользователя")
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable("userId") Long userId) {
         log.debug("Deleting user {}", userId);
         userClient.deleteUser(userId);
     }
 
+    @Operation(summary = "Получение пользователя")
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUser(@PathVariable("userId") Long userId) {
         log.debug("Get user {}", userId);
         return userClient.getUser(userId);
     }
 
+    @Operation(summary = "Получение всех пользователей")
     @GetMapping
     public ResponseEntity<Object> getAll() {
         log.debug("Get all users");

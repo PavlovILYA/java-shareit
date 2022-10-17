@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,9 +24,11 @@ import static ru.practicum.shareit.Constants.*;
 @RestController
 @RequestMapping(path = BOOKING_API_PREFIX)
 @RequiredArgsConstructor
+@Tag(name = "Booking-контроллер", description = "Позволяет управлять сделками аренды")
 public class BookingController {
 	private final BookingClient bookingClient;
 
+	@Operation(summary = "Заключение (создание) сделки")
 	@PostMapping
 	public ResponseEntity<Object> saveBooking(@Valid @RequestBody BookingCreateDto bookingCreateDto,
 											  @RequestHeader(USER_ID_HEADER) Long userId) {
@@ -33,6 +37,7 @@ public class BookingController {
 		return bookingClient.saveBooking(bookingCreateDto, userId);
 	}
 
+	@Operation(summary = "Подтверждение сделки владельцем вещи")
 	@PatchMapping("/{bookingId}")
 	public ResponseEntity<Object> approveBooking(@PathVariable("bookingId") Long bookingId,
 												 @RequestParam("approved") Boolean approved,
@@ -41,6 +46,7 @@ public class BookingController {
 		return bookingClient.approveBooking(bookingId, approved, userId);
 	}
 
+	@Operation(summary = "Получение информации о сделке")
 	@GetMapping("/{bookingId}")
 	public ResponseEntity<Object> getBooking(@PathVariable("bookingId") Long bookingId,
 											 @RequestHeader(USER_ID_HEADER) Long userId) {
@@ -48,6 +54,7 @@ public class BookingController {
 		return bookingClient.getBooking(bookingId, userId);
 	}
 
+	@Operation(summary = "Получение всех сделок арендатора")
 	@GetMapping
 	public ResponseEntity<Object> getMyBookingRequests(@RequestParam(name = "state", defaultValue = STATE_DEFAULT)
 													   String state,
@@ -63,6 +70,7 @@ public class BookingController {
 		return bookingClient.getMyBookingRequests(bookingState, userId, from, size);
 	}
 
+	@Operation(summary = "Получение всех сделок арендодателя")
 	@GetMapping("/owner")
 	public ResponseEntity<Object> getMyBookings(@RequestParam(name = "state", defaultValue = STATE_DEFAULT)
 												  String state,
