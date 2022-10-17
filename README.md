@@ -21,7 +21,7 @@ docker-compose up
 ```
 
 # Тесты
-Помимо интеграционных и юнит-тестов (JUnit и Mockito), также есть postman-тесты.
+Помимо интеграционных и юнит-тестов (JUnit и Mockito), также есть [postman-тесты](postman/Share-It-postman-collection.json).
 
 # Rest API
 После запуска приложения можно получить более подробную информацию об эндпоинтах по [этой ссылке](http://localhost:8080/swagger-ui/index.html).
